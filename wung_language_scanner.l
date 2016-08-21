@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "wung_globals.h"
 #include "wung_types.h"
+#include "wung_ast.h"
+#include "wung_compile.h"
 #include "wung_language_parser.tab.h"
 wung_scanner_globals language_scanner_globals;
 
@@ -15,15 +17,17 @@ wung_scanner_globals language_scanner_globals;
 
 int wung_lex(wval * wval);
 
-int yylex(wval * val) {
-	WVAL_UNDEF(val);
+int yylex(parse_ele * ele) {
+	wval val;
+	WVAL_UNDEF(&val);
 	int retval;
 begin:
-	retval = wung_lex(val);
+	retval = wung_lex(&val);
 	switch(retval) {
 		case T_WHITESPACE:
 			goto begin;
 	}
+	ele->ast = wung_ast_create_val(&val);
 	return retval;
 }
 
@@ -36,6 +40,7 @@ int wung_lex(wval * val) {
 
     /*!re2c
     "end" {return T_END;}
+    "echo" {return T_ECHO;}
     [0-9]+ {
 		WVAL_LONG(val,atoi((const char*)YYTEXT));
 		return T_NUMBER;
@@ -44,6 +49,7 @@ int wung_lex(wval * val) {
     "-" {return '-';}
     "*" {return '*';}
     "/" {return '/';}
+    ";" {return ';';}
     [a-z]+ {
 		return T_LOWER_CHAR;
 	}

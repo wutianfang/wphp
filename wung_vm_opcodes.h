@@ -1,0 +1,11 @@
+#ifndef WUNG_VM_OPCODES_H
+#define WUNG_VM_OPCODES_H
+enum _WUNG_OPCODES {
+	WUNG_ECHO,
+	WUNG_ADD,
+	WUNG_SUB,
+	WUNG_MUL,
+	WUNG_DIV
+};
+
+#endif

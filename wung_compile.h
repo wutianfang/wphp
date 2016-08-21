@@ -2,15 +2,15 @@
 #define WUNG_COMPILE_H
 #include "wung.h"
 
-typedef uint16_t wung_ast_kind;
-typedef uint16_t wung_ast_attr;
+typedef union _parse_elem {
+	wung_ast * ast;
+	wung_ulong num;
+}parse_ele;
 
-typedef struct _wung_ast {
-	wung_ast_kind kind;
-	wung_ast_attr attr;
-	uint32_t lineno;
-	wval val;
-	wung_ast *child[1];
-}wung_ast
+typedef union _wnode {
+	char op_type;
+	char flag;
+	zval constant;
+}wnode;
 
 #endif

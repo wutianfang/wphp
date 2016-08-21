@@ -1,14 +1,17 @@
 #ifndef WU_TYPES_H
 #define WU_TYPES_H
+#include <stdlib.h>
+#include <string.h>
 #include "wung.h"
-typedef union _wval_value{
+
+typedef union _wung_value{
 	wung_ulong         lval;	
 	double            dval;
 	wung_string      *str;
-}wval_value;
+}wung_value;
 
 typedef struct _wval{
-	wval_value value;
+	wung_value value;
 	int type_info;
 }wval;
 
@@ -28,6 +31,12 @@ typedef struct _wval{
 	(*wval).type_info = IS_LONG; \
 	(*wval).value.lval = l; \
 }while(0)
+
+#define WVAL_COPY_VALUE(z, v)   \
+	do {						\
+		memcpy(v, z, sizeof(wval)); \
+	}while(0)
+
 	
 
 #endif
