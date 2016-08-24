@@ -10,7 +10,7 @@ typedef union _parse_elem {
 typedef union _wnode {
 	char op_type;
 	char flag;
-	zval constant;
+	wval constant;
 }wnode;
 
 #endif
