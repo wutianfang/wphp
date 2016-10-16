@@ -30,7 +30,8 @@ wung_ast * wung_ast_create_1_child(int kind, int attr, wung_ast * child1) {
 	wung_ast * ast = wung_ast_alloc(sizeof(wung_ast));
 	ast->kind = kind;
 	ast->attr = attr;
-	ast->child[0] = child1;
+    ast->child[0] = child1;
+    ast->children = 1;
 	return ast;
 }
 
@@ -38,7 +39,37 @@ wung_ast * wung_ast_create_2_child(int kind, int attr, wung_ast * child1, wung_a
 	wung_ast * ast = wung_ast_alloc( sizeof(wung_ast)*2 );
 	ast->kind = kind;
 	ast->attr = attr;
-	ast->child[0] = child1;
-	ast->child[1] = child1;
+    ast->children = 2;
+    ast->child[0] = child1;
+    ast->child[1] = child2;
+
 	return ast;
+}
+char * wung_ast_print_kind(int kind) {
+    switch(kind) {
+        case WUNG_AST_ZVAL:
+            return "AST_ZVAL";
+        case WUNG_AST_LIST:
+            return "AST_LIST";
+        case WUNG_AST_ECHO:
+            return "AST_ECHO";
+        case WUNG_AST_ASSIGN:
+            return "AST_ASSIGN";
+        case WUNG_AST_BINARY_OP:
+            return "AST_BINARY_OP";
+        case WUNG_AST_VAR:
+            return "AST_VAR";
+        default:
+            return "ERROR";
+    }
+}
+
+void wung_ast_print(wung_ast * ast, int level) {
+    for (int i=0; i<level; i++) {
+        printf("\t");
+    }
+    printf("kind: %s attr: %d\n", wung_ast_print_kind(ast->kind), ast->attr);
+    for (int i=0; i< ast->children; i++) {
+        wung_ast_print(ast->child[i], level+1);
+    }
 }

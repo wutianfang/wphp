@@ -40,7 +40,7 @@ typedef struct _wval{
 
 #define WVAL_COPY_VALUE(z, v)   \
 	do {						\
-		memcpy(v, z, sizeof(wval)); \
+		memcpy(z, v, sizeof(wval)); \
 	}while(0)
 
 	

@@ -36,17 +36,17 @@ void yyerror (char const *);
 %%
 start:
     top_statement_list { CG(ast)=$1; }
-top_statement_list :
+    top_statement_list :
 		top_statement_list top_statement {
             $$ = wung_ast_add_list($1, $2);
         }
-	|	{ $$ = wung_ast_create_list(10, WUNG_AST_LIST, 0);}
+	|	{ $$ = wung_ast_create_list(64, WUNG_AST_LIST, 0);}
 	;
 top_statement:
     statement { $$ = $1; }
     ;
 statement:
-		T_ECHO expr ';' { $$ = wung_ast_create_1_child(WUNG_AST_ECHO, 0, $1); }	
+		T_ECHO expr ';' { $$ = wung_ast_create_1_child(WUNG_AST_ECHO, 0, $2); }	
     |   variable '=' expr ';' { $$ = wung_ast_create_2_child(WUNG_AST_ASSIGN, 0, $1, $3);}
     ;
 expr :
@@ -68,7 +68,8 @@ int compile_string(char *string) {
 	int len = strlen(string);
 	SCNG(yy_limit) = (unsigned char*)string + len - 1;
     yyparse();
-
+    
+    wung_ast_print(CG(ast), 0);
     return 0;
 }
 

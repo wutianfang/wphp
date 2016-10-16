@@ -61,7 +61,7 @@ int wung_lex(wval * val) {
         printf("str: %ld\n", YYCURSOR-YYTEXT);
         */
         WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -1));
-        printf("val:%s\n", val->value.str->val);
+        //printf("val:%s\n", val->value.str->val);
         return T_VARIABLE; 
     }
     [ \n\t\r]+ {
