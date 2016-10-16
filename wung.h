@@ -12,9 +12,24 @@
 #if HAVE_STDINT_H
 # include <stdint.h>
 #endif
+#include <stdlib.h>
+#include<string.h>
+#include<stdio.h>
 
 typedef int wung_ulong;
-typedef char* wung_string;
+typedef struct _wung_string{
+    int len;
+    char val[0];
+} wung_string;
+
+static wung_string * wung_string_init(char * str, int len) {
+    wung_string *s =  (wung_string*) malloc(sizeof(wung_string) + len+10);
+    memcpy(s->val, str, len);
+    s->len = len;
+    s->val[len] = '\0';
+    return s;
+}
+
 
 #endif
 

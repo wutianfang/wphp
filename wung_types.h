@@ -32,6 +32,12 @@ typedef struct _wval{
 	(*wval).value.lval = l; \
 }while(0)
 
+#define WVAL_STRING(wval, string, len) do{ \
+    wung_string * __s = wung_string_init((char*)(string), (len)); \
+    (wval)->value.str = __s; \
+	(wval)->type_info = IS_STRING; \
+}while(0)
+
 #define WVAL_COPY_VALUE(z, v)   \
 	do {						\
 		memcpy(v, z, sizeof(wval)); \

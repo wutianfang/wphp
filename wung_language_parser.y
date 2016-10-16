@@ -20,6 +20,7 @@ void yyerror (char const *);
 %token T_BEGIN
 %token <ast>T_ECHO
 %token <ast>T_NUMBER
+%token <ast>T_VARIABLE
 %token <ast>T_INPUT_ERROR
 %token <ast>T_LOWER_CHAR
 %token <ast>T_UPPER_CHAR
@@ -28,32 +29,50 @@ void yyerror (char const *);
 %left '+' '-'
 %right '*' '/'
 
-%type <ast> top_statement_list top_statement
+%type <ast> top_statement_list top_statement statement
+%type <ast> variable
 %type <ast> expr
 
 %%
+start:
+    top_statement_list { CG(ast)=$1; }
 top_statement_list :
-		top_statement_list top_statement {$$ = wung_ast_add_list($1, $2);}
+		top_statement_list top_statement {
+            $$ = wung_ast_add_list($1, $2);
+        }
 	|	{ $$ = wung_ast_create_list(10, WUNG_AST_LIST, 0);}
 	;
 top_statement:
-		T_ECHO expr ';' { $$ = wung_ast_create_1_child(WUNG_AST_ECHO, 0, $2); }	
+    statement { $$ = $1; }
+    ;
+statement:
+		T_ECHO expr ';' { $$ = wung_ast_create_1_child(WUNG_AST_ECHO, 0, $1); }	
+    |   variable '=' expr ';' { $$ = wung_ast_create_2_child(WUNG_AST_ASSIGN, 0, $1, $3);}
+    ;
 expr :
 		T_NUMBER { $$ = $1; }
     |	expr '+' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_ADD, $1, $3); }
     |	expr '-' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_SUB, $1, $3); }
     |	expr '*' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_MUL, $1, $3); }
     |	expr '/' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_DIV, $1, $3); }
+    |   variable {$$ = $1;}
 	;
+variable :
+    T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); }
 
 %%
-int main(int argc, char * argv[]) {
-    SCNG(yy_cursor) = (unsigned char *)argv[1];
-	int len = strlen(argv[1]);
-	SCNG(yy_limit) = (unsigned char*)argv[1] + len - 1;
 
-    return yyparse();
+
+int compile_string(char *string) {
+    SCNG(yy_cursor) = (unsigned char *)string;
+	int len = strlen(string);
+	SCNG(yy_limit) = (unsigned char*)string + len - 1;
+    yyparse();
+
+    return 0;
 }
+
+
 void yyerror (char const *s) {
 
     fprintf (stderr, "%s xx\n", s);

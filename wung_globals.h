@@ -1,3 +1,8 @@
+#include "wung.h"
+#include "wung_types.h"
+#include "wung_ast.h"
+#include "wung_compile.h"
+
 typedef struct _wung_scanner_globals {
     unsigned char *yy_cursor;
     unsigned char *yy_marker;
@@ -5,5 +10,14 @@ typedef struct _wung_scanner_globals {
 	unsigned char *yy_text;
 }wung_scanner_globals;
 
+typedef struct _wung_compiler_globals {
+    wung_op_array *active_op_array;
+    wung_ast * ast;
+    int wung_lineno;
+}wung_compiler_globals;
+
 extern wung_scanner_globals language_scanner_globals;
 #define SCNG(v) language_scanner_globals.v
+
+extern wung_compiler_globals compiler_globals;
+#define CG(v)  compiler_globals.v
