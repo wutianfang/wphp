@@ -30,6 +30,31 @@ static wung_string * wung_string_init(char * str, int len) {
     return s;
 }
 
+static long wung_hash_string(const char * str, int len) {
+    long hash = 5381;
+    for (; len >= 8; len -= 8) {
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+        hash = ((hash << 5) + hash) + *str++;
+    }
+    switch (len) {
+        case 7: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+        case 6: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+        case 5: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+        case 4: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+        case 3: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+        case 2: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+        case 1: hash = ((hash << 5) + hash) + *str++; break;
+        case 0: break;
+    }
+    return hash | 0x8000000000000000;
+}
+
 
 #endif
 

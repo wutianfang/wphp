@@ -63,7 +63,7 @@ variable :
 %%
 
 
-int compile_string(char *string) {
+wung_op_array * compile_string(char *string) {
     SCNG(yy_cursor) = (unsigned char *)string;
 	int len = strlen(string);
 	SCNG(yy_limit) = (unsigned char*)string + len - 1;
@@ -74,7 +74,7 @@ int compile_string(char *string) {
     wung_init_op_array(CG(active_op_array));
     wung_compile_top_stmt(CG(ast));
 
-    return 0;
+    return CG(active_op_array);
 }
 
 

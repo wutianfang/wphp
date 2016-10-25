@@ -70,6 +70,34 @@ void wung_compile_binary_op(wnode * result, wung_ast * ast) {
     wung_emit_op(result, ast->attr, left_node, right_node);  
 }
 
+int lookup_cv(wung_op_array * op_array, wung_string *name) {
+    int i=0,name_hash = wung_hash_string(name->val, name->len);
+    for (i=0; i< op_array->last_var; i++) {
+        wung_string * v = op_array->vars[i];
+        if (v->len==name->len
+        && memcmp(v->val, name->val, name->len)==0) {
+            return i;
+        }
+    }
+    i++;
+    if (i>op_array->var_size) {
+        op_array->var_size += 16;
+        op_array->vars = realloc(
+            op_array->vars,
+            sizeof(wung_string) * op_array->var_size
+        );
+    }
+    op_array->vars[i] = name;
+    return i;
+}
+
+void wung_compile_var(wnode * result, wung_ast * ast) {
+    wung_ast * name_ast = ast->child[0];
+    wung_string * name = name_ast->val.value.str;
+    result->op_type = IS_CV;
+    result->u.var = lookup_cv(CG(active_op_array), name);
+}
+
 void wung_compile_expr(wnode * result, wung_ast * ast) {
     switch(ast->kind) {
         case WUNG_AST_ZVAL:
@@ -81,10 +109,15 @@ void wung_compile_expr(wnode * result, wung_ast * ast) {
             wung_compile_binary_op(result, ast);
             break;
 
+        case WUNG_AST_VAR:
+            wung_compile_var(result, ast);            
+            break; 
+
         default:
         printf("error kind:%s on wung_compile_expr\n", wung_ast_print_kind(ast->kind));
     }
 }
+
 
 wung_op * get_next_op(wung_op_array * op_array) {
     op_array->last++;

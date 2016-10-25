@@ -52,6 +52,7 @@ typedef struct _wung_op_array {
     wung_op *opcodes; // opcode 数组
 
     int last_var; //  变量数组指针
+    int var_size;
     wung_string **vars; // 变量字符串数组
 
     int literal_size; 
@@ -62,7 +63,7 @@ typedef struct _wung_op_array {
 
 } wung_op_array;
 
-int compile_string(char *);
+wung_op_array * compile_string(char *);
 
 void wung_init_op_array(wung_op_array * op_array);
 void wung_compile_expr(wnode * node, wung_ast * ast);
