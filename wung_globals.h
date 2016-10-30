@@ -2,6 +2,7 @@
 #include "wung_types.h"
 #include "wung_ast.h"
 #include "wung_compile.h"
+#include "wung_execute.h"
 
 typedef struct _wung_scanner_globals {
     unsigned char *yy_cursor;
@@ -15,6 +16,21 @@ typedef struct _wung_compiler_globals {
     wung_ast * ast;
     int wung_lineno;
 }wung_compiler_globals;
+
+typedef struct _wung_executor_gloabls {
+    wung_array symbol_table;
+    HashTable included_files;
+    int exit_status;
+
+    wval          *vm_stack_top;
+    wval          *vm_stack_end;
+    wung_execute_data * current_execute_data;
+
+    HashTable *function_table;
+    HashTable *class_table; 
+} wung_executor_gloabls;
+
+
 
 extern wung_scanner_globals language_scanner_globals;
 #define SCNG(v) language_scanner_globals.v

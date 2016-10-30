@@ -1,17 +1,10 @@
 #ifndef WUNG_H
 #define WUNG_H
 
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
+#include <inttypes.h>
+#include <stdint.h>
 
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-
-#if HAVE_STDINT_H
-# include <stdint.h>
-#endif
 #include <stdlib.h>
 #include<string.h>
 #include<stdio.h>

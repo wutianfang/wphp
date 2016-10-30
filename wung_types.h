@@ -15,6 +15,9 @@ typedef struct _wval{
 	int type_info;
 }wval;
 
+typedef struct _wung_execute_data wung_execute_data;
+
+
 #define IS_UNDEF					0
 #define IS_NULL						1
 #define IS_FALSE					2
@@ -42,6 +45,14 @@ typedef struct _wval{
 	do {						\
 		memcpy(z, v, sizeof(wval)); \
 	}while(0)
+
+struct _wung_array {
+    int size;
+};
+
+typedef struct _wung_array wung_array;
+typedef struct _wung_array HashTable;
+
 
 	
 

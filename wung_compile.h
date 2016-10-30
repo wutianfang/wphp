@@ -10,13 +10,6 @@ typedef union _parse_ele {
 	wung_ulong num;
 }parse_ele;
 
-/*
-typedef union _wnode {
-	char op_type;
-	char flag;
-	wval constant;
-}wnode;
-*/
 
 #define IS_CONST    (1<<0)
 #define IS_TMP_VAR  (1<<1)
@@ -40,7 +33,8 @@ typedef struct _wung_op {
     wnode *op2;
     wnode *result;
     char opcode;
-    const void*handler;
+    //const *handler;
+    int (*handler)(wung_execute_data * execute_data);
     int lineno;
 } wung_op;
 
@@ -67,10 +61,13 @@ wung_op_array * compile_string(char *);
 
 void wung_init_op_array(wung_op_array * op_array);
 void wung_compile_expr(wnode * node, wung_ast * ast);
+void wung_compile_var(wnode * node, wung_ast * ast);
 void wung_compile_top_stmt(wung_ast * ast);
 void wung_compile_stmt(wung_ast * ast);
 void wung_compile_echo(wung_ast * ast);
-void wung_compile_echo(wung_ast * ast);
+void wung_compile_assign(wung_ast * ast);
 wung_op * wung_emit_op(wnode * result, char opcode, wnode *op1, wnode * op2);
+void pass_two(wung_op_array * op_array);
+void wung_print_opline(wung_op * opline);
 
 #endif

@@ -69,10 +69,11 @@ wung_op_array * compile_string(char *string) {
 	SCNG(yy_limit) = (unsigned char*)string + len - 1;
     yyparse();
     
-    //wung_ast_print(CG(ast), 0);
+    wung_ast_print(CG(ast), 0);
     CG(active_op_array) = malloc(sizeof(wung_op_array));
     wung_init_op_array(CG(active_op_array));
     wung_compile_top_stmt(CG(ast));
+    pass_two(CG(active_op_array));
 
     return CG(active_op_array);
 }

@@ -3,3 +3,4 @@ bin_wung
 wung_language_scanner.c
 wung_language_parser.tab.c
 wung_language_parser.tab.h
+*.dSYM

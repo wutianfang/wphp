@@ -3,6 +3,7 @@
 #include "wung_globals.h"
 #include "wung_compile.h"
 #include "wung_ast.h"
+#include "wung_vm.h"
 
 wung_compiler_globals compiler_globals;
 
@@ -10,7 +11,10 @@ void wung_init_op_array(wung_op_array * op_array) {
     op_array->last = 0;
     op_array->opcode_size = INITIAL_OP_ARRAY_SIZE;
     op_array->opcodes = (wung_op*)malloc(sizeof(wung_op)*INITIAL_OP_ARRAY_SIZE);
+
     op_array->vars = NULL;
+    op_array->last_var =0;
+    op_array->var_size = 0;
 
     op_array->literal_size = 0;
     op_array->literals = NULL;
@@ -41,12 +45,14 @@ void wung_compile_top_stmt(wung_ast * ast) {
 }
 
 void wung_compile_stmt(wung_ast * ast) {
-
     switch(ast->kind) {
     case WUNG_AST_ECHO:
         wung_compile_echo(ast); 
         break;
-        defaut:
+    case WUNG_AST_ASSIGN:
+        wung_compile_assign(ast);
+        break;
+    default:
         printf("error ast on compile stmt\n");
     }
 }
@@ -55,6 +61,19 @@ void wung_compile_echo(wung_ast * ast) {
     wnode * node = (wnode *) malloc(sizeof(wnode));
     wung_compile_expr(node, ast->child[0]);
     wung_op * opline = wung_emit_op(NULL, WUNG_ECHO, node, NULL); 
+}
+
+void wung_compile_assign(wung_ast * ast) {
+    wung_ast * right_ast = ast->child[1];
+    wung_ast * left_ast = ast->child[0];
+
+    wnode * right_node = (wnode *) malloc(sizeof(wnode));
+    wnode * left_node = (wnode *) malloc(sizeof(wnode));
+    
+    wung_compile_expr(right_node, right_ast);
+    wung_compile_var(left_node, left_ast);
+
+    wung_op * opline = wung_emit_op(NULL, WUNG_ASSIGN, left_node, right_node);
 }
 
 void wung_compile_binary_op(wnode * result, wung_ast * ast) {
@@ -79,8 +98,8 @@ int lookup_cv(wung_op_array * op_array, wung_string *name) {
             return i;
         }
     }
-    i++;
-    if (i>op_array->var_size) {
+    op_array->last_var = i+1;
+    if (i>=op_array->var_size) {
         op_array->var_size += 16;
         op_array->vars = realloc(
             op_array->vars,
@@ -125,7 +144,7 @@ wung_op * get_next_op(wung_op_array * op_array) {
         op_array->opcode_size *= 4;
         op_array->opcodes = realloc(op_array->opcodes, sizeof(wung_op) * op_array->opcode_size);
     }
-    return op_array->opcodes + op_array->last;
+    return op_array->opcodes + op_array->last-1;
 }
 
 wung_op *  wung_emit_op(wnode * result, char opcode, wnode *op1, wnode * op2) {
@@ -136,4 +155,59 @@ wung_op *  wung_emit_op(wnode * result, char opcode, wnode *op1, wnode * op2) {
     op->op2 = op2;
     op->result = result;
     return op;
+}
+
+void pass_two(wung_op_array * op_array) {
+    int i=0;
+    for(i=0; i< op_array->last; i++) {
+        wung_vm_set_opcode_handler(op_array->opcodes+i);
+    }
+}
+
+char * opcode2str(int opcode) {
+    switch(opcode) {
+        case WUNG_ECHO:return "WUNG_ECHO";
+        case WUNG_ADD:return "WUNG_ADD\t";
+        case WUNG_SUB:return "WUNG_SUB";
+        case WUNG_MUL:return "WUNG_MUL";
+        case WUNG_DIV:return "WUNG_DIV";
+        case WUNG_ASSIGN:return "WUNG_ASSIGN";
+    }
+    return "ERROR";
+}
+char * wnode_type_2_str(char type) {
+    switch(type) {
+        case IS_CONST:return "CONST";
+        case IS_TMP_VAR:return "TMP_VAR";
+        case IS_VAR:return "VAR";
+        case IS_UNUSED:return "UNUSED";
+        case IS_CV:return "CV";
+    }
+    return "ERROR";
+}
+
+void wung_print_opline(wung_op * opline) {
+    char * opcode = opcode2str(opline->opcode);
+    printf("opline:%s\t%s:%d", 
+            opcode2str(opline->opcode),
+            wnode_type_2_str(opline->op1->op_type),
+            opline->op1->u.constant
+    ); 
+
+    if(opline->op2) {
+        printf("\t%s:%d\t",
+            wnode_type_2_str(opline->op2->op_type),
+            opline->op2->u.constant
+        );
+    } else {
+        printf("\t");
+    }
+    if(opline->result) {
+        printf("\t%s:%d\n",
+            wnode_type_2_str(opline->result->op_type),
+            opline->result->u.constant
+        );
+    } else {
+        printf("\n");
+    }
 }
