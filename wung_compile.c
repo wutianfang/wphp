@@ -19,6 +19,8 @@ void wung_init_op_array(wung_op_array * op_array) {
     op_array->literal_size = 0;
     op_array->literals = NULL;
     op_array->last_literal = 0;
+
+    op_array->T = 0;
 }
 
 int wung_add_literal(wung_op_array * op_array, wval * val) {
@@ -82,9 +84,12 @@ void wung_compile_binary_op(wnode * result, wung_ast * ast) {
 
     wnode * left_node = (wnode *) malloc(sizeof(wnode));
     wnode * right_node = (wnode *) malloc(sizeof(wnode));
+    //wnode * left_node, *right_node;
 
     wung_compile_expr(left_node, left_ast);
     wung_compile_expr(right_node, right_ast);
+
+    wung_make_tmp_var(result, CG(active_op_array));
 
     wung_emit_op(result, ast->attr, left_node, right_node);  
 }
@@ -155,6 +160,10 @@ wung_op *  wung_emit_op(wnode * result, char opcode, wnode *op1, wnode * op2) {
     op->op2 = op2;
     op->result = result;
     return op;
+}
+void wung_make_tmp_var(wnode* result, wung_op_array * op_array) {
+    result->op_type = IS_TMP_VAR;
+    result->u.constant = op_array->T++;
 }
 
 void pass_two(wung_op_array * op_array) {

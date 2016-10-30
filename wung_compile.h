@@ -49,6 +49,8 @@ typedef struct _wung_op_array {
     int var_size;
     wung_string **vars; // 变量字符串数组
 
+    int T;
+
     int literal_size; 
     int last_literal;
     wval *literals; //常量数组和指针
@@ -66,7 +68,11 @@ void wung_compile_top_stmt(wung_ast * ast);
 void wung_compile_stmt(wung_ast * ast);
 void wung_compile_echo(wung_ast * ast);
 void wung_compile_assign(wung_ast * ast);
+
 wung_op * wung_emit_op(wnode * result, char opcode, wnode *op1, wnode * op2);
+void wung_make_tmp_var(wnode* result, wung_op_array * op_array);
+
+
 void pass_two(wung_op_array * op_array);
 void wung_print_opline(wung_op * opline);
 
