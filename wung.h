@@ -47,7 +47,7 @@ static long wung_hash_string(const char * str, int len) {
     }
     return hash | 0x8000000000000000;
 }
-
+# define MAX_LENGTH_OF_LONG 20
 
 #endif
 

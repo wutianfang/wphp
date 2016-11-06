@@ -27,7 +27,10 @@ static int WUNG_ADD_HANDLER(wung_execute_data * execute_data ) {
     wval *op1 = get_val_by_node(opline->op1, execute_data);
     wval *op2 = get_val_by_node(opline->op2, execute_data);
     wval *result = get_val_by_node(opline->result, execute_data);
-    WVAL_LONG(result, op1->value.lval + op2->value.lval);
+
+    int val1 = convert2long(op1);
+    int val2 = convert2long(op2);
+    WVAL_LONG(result, val1 + val2);
     return 0;
 }
 
@@ -36,7 +39,10 @@ static int WUNG_SUB_HANDLER(wung_execute_data * execute_data ) {
     wval *op1 = get_val_by_node(opline->op1, execute_data);
     wval *op2 = get_val_by_node(opline->op2, execute_data);
     wval *result = get_val_by_node(opline->result, execute_data);
-    WVAL_LONG(result, op1->value.lval - op2->value.lval);
+
+    int val1 = convert2long(op1);
+    int val2 = convert2long(op2);
+    WVAL_LONG(result, val1 - val2);
     return 0;
 }
 static int WUNG_DIV_HANDLER(wung_execute_data * execute_data ) {
@@ -44,7 +50,10 @@ static int WUNG_DIV_HANDLER(wung_execute_data * execute_data ) {
     wval *op1 = get_val_by_node(opline->op1, execute_data);
     wval *op2 = get_val_by_node(opline->op2, execute_data);
     wval *result = get_val_by_node(opline->result, execute_data);
-    WVAL_LONG(result, op1->value.lval / op2->value.lval);
+
+    int val1 = convert2long(op1);
+    int val2 = convert2long(op2);
+    WVAL_LONG(result, val1 / val2);
     return 0;
 }
 static int WUNG_MUL_HANDLER(wung_execute_data * execute_data ) {
@@ -52,9 +61,29 @@ static int WUNG_MUL_HANDLER(wung_execute_data * execute_data ) {
     wval *op1 = get_val_by_node(opline->op1, execute_data);
     wval *op2 = get_val_by_node(opline->op2, execute_data);
     wval *result = get_val_by_node(opline->result, execute_data);
-    WVAL_LONG(result, op1->value.lval * op2->value.lval);
+
+    int val1 = convert2long(op1);
+    int val2 = convert2long(op2);
+    WVAL_LONG(result, val1 * val2);
     return 0;
 }
+
+static int WUNG_CONCAT_HANDLER(wung_execute_data * execute_data ) {
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+
+    wung_string *str1 = convert2str(op1);
+    wung_string *str2 = convert2str(op2);
+    WVAL_STRING(result, str1->val, str1->len + str2->len - 1);
+    strcpy(
+        result->value.str->val + str1->len ,
+        str2->val
+    );
+    return 0;
+}
+
 static int WUNG_ASSIGN_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
     wval *op1 = get_val_by_node(opline->op1, execute_data);
@@ -86,6 +115,10 @@ static void wung_vm_set_opcode_handler(wung_op* op) {
 
         case WUNG_ASSIGN:
         op->handler = WUNG_ASSIGN_HANDLER;
+        break;
+
+        case WUNG_CONCAT:
+        op->handler = WUNG_CONCAT_HANDLER;
         break;
     }
 }

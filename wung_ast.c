@@ -65,7 +65,6 @@ char * wung_ast_print_kind(int kind) {
 }
 
 void wung_ast_print(wung_ast * ast, int level) {
-    return ;
     for (int i=0; i<level; i++) {
         printf("\t");
     }

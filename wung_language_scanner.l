@@ -46,7 +46,7 @@ int wung_lex(wval * val) {
 		WVAL_LONG(val,atoi((const char*)YYTEXT));
 		return T_NUMBER;
 	}
-    "\""[a-zA-Z_ ]+"\"" {
+    "\""[a-zA-Z_0-9 \\]+"\"" {
         WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -2));
         //printf("val:%s\n", val->value.str->val);
         return T_STRING;
@@ -55,8 +55,11 @@ int wung_lex(wval * val) {
     "-" {return '-';}
     "*" {return '*';}
     "/" {return '/';}
+    "." {return '.';}
     ";" {return ';';}
     "=" {return '=';}
+    "(" {return '(';}
+    ")" {return ')';}
     "\$"[a-zA-Z_][a-zA-Z_0-9]* {
         WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -1));
         //printf("val:%s\n", val->value.str->val);

@@ -181,6 +181,7 @@ char * opcode2str(int opcode) {
         case WUNG_MUL:return "WUNG_MUL";
         case WUNG_DIV:return "WUNG_DIV";
         case WUNG_ASSIGN:return "WUNG_ASSIGN";
+        case WUNG_CONCAT:return "WUNG_CONCAT";
     }
     return "ERROR";
 }

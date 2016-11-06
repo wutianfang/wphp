@@ -57,7 +57,9 @@ expr :
     |	expr '-' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_SUB, $1, $3); }
     |	expr '*' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_MUL, $1, $3); }
     |	expr '/' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_DIV, $1, $3); }
+    |	expr '.' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_CONCAT, $1, $3); }
     |   variable {$$ = $1;}
+    |	'(' expr ')'  { $$ = $2; }
 	;
 variable :
     T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); }
@@ -71,7 +73,7 @@ wung_op_array * compile_string(char *string) {
 	SCNG(yy_limit) = (unsigned char*)string + len - 1;
     yyparse();
     
-    wung_ast_print(CG(ast), 0);
+    //wung_ast_print(CG(ast), 0);
     CG(active_op_array) = malloc(sizeof(wung_op_array));
     wung_init_op_array(CG(active_op_array));
     wung_compile_top_stmt(CG(ast));

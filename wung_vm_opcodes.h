@@ -7,6 +7,7 @@ enum _WUNG_OPCODES {
 	WUNG_MUL,
 	WUNG_DIV,
 	WUNG_ASSIGN,
+	WUNG_CONCAT,
 };
 
 #endif
