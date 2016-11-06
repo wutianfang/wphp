@@ -14,6 +14,9 @@ struct _wung_execute_data{
     wval * This;
     wval * return_value;
     struct _wung_execute_data *prev_execute_data;
+    wval * vars;
+    wval * temp_vars;
+    wung_op_array * func;
 };
 
 #define EX(element)  ((execute_data)->element)
@@ -21,6 +24,9 @@ struct _wung_execute_data{
 
 int wung_execute(wung_op_array * op_array);
 void init_execute_data(wung_execute_data * execute_data, wung_op_array *op_array);
+
+wval * get_val_by_node(wnode * node, wung_execute_data * execute_data);
+
 
 #endif
 

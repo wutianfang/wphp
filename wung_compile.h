@@ -74,6 +74,6 @@ void wung_make_tmp_var(wnode* result, wung_op_array * op_array);
 
 
 void pass_two(wung_op_array * op_array);
-void wung_print_opline(wung_op * opline);
+void wung_print_opline(const wung_op * opline);
 
 #endif

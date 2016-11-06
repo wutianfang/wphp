@@ -195,7 +195,7 @@ char * wnode_type_2_str(char type) {
     return "ERROR";
 }
 
-void wung_print_opline(wung_op * opline) {
+void wung_print_opline(const wung_op * opline) {
     char * opcode = opcode2str(opline->opcode);
     printf("opline:%s\t%s:%d", 
             opcode2str(opline->opcode),

@@ -6,30 +6,53 @@
 #include "wung_execute.h"
 #include "wung_compile.h"
 
+# define USE_OPLINE const wung_op *opline = EX(opline);
+
 static int WUNG_ECHO_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_ECHO_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    printf("%d", op1->value.lval);
     return 0;
 }
 
 static int WUNG_ADD_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_ADD_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    WVAL_LONG(result, op1->value.lval + op2->value.lval);
     return 0;
 }
 
 static int WUNG_SUB_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_SUB_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    WVAL_LONG(result, op1->value.lval - op2->value.lval);
     return 0;
 }
 static int WUNG_DIV_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_DIV_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    WVAL_LONG(result, op1->value.lval / op2->value.lval);
     return 0;
 }
 static int WUNG_MUL_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_MUL_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    WVAL_LONG(result, op1->value.lval * op2->value.lval);
     return 0;
 }
 static int WUNG_ASSIGN_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_ASSIGN_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    WVAL_COPY_VALUE(op1, op2);
     return 0;
 }
 static void wung_vm_set_opcode_handler(wung_op* op) {

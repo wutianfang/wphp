@@ -54,6 +54,4 @@ typedef struct _wung_array wung_array;
 typedef struct _wung_array HashTable;
 
 
-	
-
 #endif
