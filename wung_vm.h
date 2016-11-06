@@ -11,7 +11,14 @@
 static int WUNG_ECHO_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
     wval *op1 = get_val_by_node(opline->op1, execute_data);
-    printf("%d", op1->value.lval);
+    switch(op1->type_info) {
+        case IS_STRING:
+            printf("%s", op1->value.str->val);
+            break;
+        case IS_LONG:
+            printf("%d", op1->value.lval);
+            break;
+    }
     return 0;
 }
 

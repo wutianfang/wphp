@@ -21,6 +21,7 @@ void yyerror (char const *);
 %token <ast>T_ECHO
 %token <ast>T_NUMBER
 %token <ast>T_VARIABLE
+%token <ast>T_STRING
 %token <ast>T_INPUT_ERROR
 %token <ast>T_LOWER_CHAR
 %token <ast>T_UPPER_CHAR
@@ -51,6 +52,7 @@ statement:
     ;
 expr :
 		T_NUMBER { $$ = $1; }
+    |	T_STRING { $$ = $1; }
     |	expr '+' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_ADD, $1, $3); }
     |	expr '-' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_SUB, $1, $3); }
     |	expr '*' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_MUL, $1, $3); }
@@ -80,6 +82,6 @@ wung_op_array * compile_string(char *string) {
 
 
 void yyerror (char const *s) {
-
     fprintf (stderr, "%s xx\n", s);
+    exit(1);
 }

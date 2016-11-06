@@ -41,13 +41,16 @@ int wung_lex(wval * val) {
     /*!re2c
     re2c:yyfill:check = 0;
 
-
-    "end" {return T_END;}
     "echo" {return T_ECHO;}
     [0-9]+ {
 		WVAL_LONG(val,atoi((const char*)YYTEXT));
 		return T_NUMBER;
 	}
+    "\""[a-zA-Z_ ]+"\"" {
+        WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -2));
+        //printf("val:%s\n", val->value.str->val);
+        return T_STRING;
+    }
     "+" {return '+';}
     "-" {return '-';}
     "*" {return '*';}
@@ -55,11 +58,6 @@ int wung_lex(wval * val) {
     ";" {return ';';}
     "=" {return '=';}
     "\$"[a-zA-Z_][a-zA-Z_0-9]* {
-    /*
-        printf("yytext: %s\n", YYTEXT);
-        printf("YYCURSOR: %s\n", YYCURSOR);
-        printf("str: %ld\n", YYCURSOR-YYTEXT);
-        */
         WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -1));
         //printf("val:%s\n", val->value.str->val);
         return T_VARIABLE; 
