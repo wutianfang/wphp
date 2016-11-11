@@ -9,8 +9,8 @@ void wung_execute_ex(wung_execute_data * execute_data) {
         if (EX(opline)->handler==0) {
             break;
         }
-        //wung_print_opline(EX(opline));
-        (EX(opline)->handler)(execute_data);
+        wung_print_opline(EX(opline));
+        //(EX(opline)->handler)(execute_data);
         WUNG_NEXT_OPCODE;
         if (i++>=max) {
            break;

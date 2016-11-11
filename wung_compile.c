@@ -122,6 +122,21 @@ void wung_compile_var(wnode * result, wung_ast * ast) {
     result->u.var = lookup_cv(CG(active_op_array), name);
 }
 
+void wung_compile_array(wnode * result, wung_ast * ast) {
+    int i;
+    wung_op * opline;
+    wnode * node;
+    for(i=0; i< ast->children; i++) {
+        node = (wnode *) malloc(sizeof(wnode));
+        wung_compile_expr(node, ast->child[i]->child[0]);
+        if (i==0) {
+            opline = wung_emit_op(result, WUNG_INIT_ARRAY, node, NULL); 
+        } else {
+            opline = wung_emit_op(result, WUNG_ADD_ARRAY_ELEMENT, node, NULL); 
+        }
+    }
+}
+
 void wung_compile_expr(wnode * result, wung_ast * ast) {
     switch(ast->kind) {
         case WUNG_AST_ZVAL:
@@ -135,6 +150,9 @@ void wung_compile_expr(wnode * result, wung_ast * ast) {
 
         case WUNG_AST_VAR:
             wung_compile_var(result, ast);            
+            break; 
+        case WUNG_AST_ARRAY:
+            wung_compile_array(result, ast);            
             break; 
 
         default:
@@ -182,6 +200,8 @@ char * opcode2str(int opcode) {
         case WUNG_DIV:return "WUNG_DIV";
         case WUNG_ASSIGN:return "WUNG_ASSIGN";
         case WUNG_CONCAT:return "WUNG_CONCAT";
+        case WUNG_INIT_ARRAY:return "WUNG_INIT_ARRAY";
+        case WUNG_ADD_ARRAY_ELEMENT:return "WUNG_ADD_ARRAY_ELEMENT";
     }
     return "ERROR";
 }

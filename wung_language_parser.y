@@ -33,6 +33,7 @@ void yyerror (char const *);
 %type <ast> top_statement_list top_statement statement
 %type <ast> variable
 %type <ast> expr
+%type <ast> array_scalar non_empty_array_pair_list array_pair
 
 %%
 start:
@@ -59,10 +60,26 @@ expr :
     |	expr '/' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_DIV, $1, $3); }
     |	expr '.' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_CONCAT, $1, $3); }
     |   variable {$$ = $1;}
-    |	'(' expr ')'  { $$ = $2; }
-	;
+    |	'(' expr ')'  { $$ = $2;}
+    |   array_scalar { $$ = $1;}
+    ;
 variable :
-    T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); }
+    T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); };
+
+array_scalar :
+        '[' ']' { $$ = wung_ast_create_list(0, WUNG_AST_ARRAY, 0); }
+    |   '[' non_empty_array_pair_list ']' { $$ = $2; }
+    ;
+non_empty_array_pair_list :
+        non_empty_array_pair_list ',' array_pair {  $$ = wung_ast_add_list($1, $3); }
+    |   array_pair {
+            $$ = wung_ast_create_list(1, WUNG_AST_ARRAY, 0);
+            wung_ast_add_list($$, $1);
+        }
+    ;
+array_pair :
+        expr { $$ = wung_ast_create_2_child(WUNG_AST_ARRAY_ELEM, 0, $1, NULL); }
+    ;
 
 %%
 
@@ -73,7 +90,7 @@ wung_op_array * compile_string(char *string) {
 	SCNG(yy_limit) = (unsigned char*)string + len - 1;
     yyparse();
     
-    //wung_ast_print(CG(ast), 0);
+    wung_ast_print(CG(ast), 0);
     CG(active_op_array) = malloc(sizeof(wung_op_array));
     wung_init_op_array(CG(active_op_array));
     wung_compile_top_stmt(CG(ast));

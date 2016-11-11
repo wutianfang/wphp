@@ -84,6 +84,16 @@ static int WUNG_CONCAT_HANDLER(wung_execute_data * execute_data ) {
     return 0;
 }
 
+static int WUNG_INIT_ARRAY_HANDLER(wung_execute_data * execute_data ) {
+    printf("WUNG_INIT_ARRAY_HANDLER\n");
+    return 0;
+}
+
+static int WUNG_ADD_ARRAY_ELEMENT_HANDLER(wung_execute_data * execute_data ) {
+    printf("WUNG_ADD_ARRAY_ELEMENT_HANDLER\n");
+    return 0;
+}
+
 static int WUNG_ASSIGN_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
     wval *op1 = get_val_by_node(opline->op1, execute_data);
@@ -119,6 +129,14 @@ static void wung_vm_set_opcode_handler(wung_op* op) {
 
         case WUNG_CONCAT:
         op->handler = WUNG_CONCAT_HANDLER;
+        break;
+
+        case WUNG_INIT_ARRAY:
+        op->handler = WUNG_INIT_ARRAY_HANDLER;
+        break;
+
+        case WUNG_ADD_ARRAY_ELEMENT:
+        op->handler = WUNG_ADD_ARRAY_ELEMENT_HANDLER;
         break;
     }
 }

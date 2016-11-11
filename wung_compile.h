@@ -64,6 +64,7 @@ wung_op_array * compile_string(char *);
 void wung_init_op_array(wung_op_array * op_array);
 void wung_compile_expr(wnode * node, wung_ast * ast);
 void wung_compile_var(wnode * node, wung_ast * ast);
+void wung_compile_array(wnode * node, wung_ast * ast);
 void wung_compile_top_stmt(wung_ast * ast);
 void wung_compile_stmt(wung_ast * ast);
 void wung_compile_echo(wung_ast * ast);

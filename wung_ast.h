@@ -20,10 +20,12 @@ struct _wung_ast {
 enum _ast_kind {
 	WUNG_AST_ZVAL = 1 << WUNG_AST_SPECIAL_SHIFT,
 	WUNG_AST_LIST = 1 << WUNG_AST_LIST_SHIFT,
+    WUNG_AST_ARRAY,
 	WUNG_AST_ECHO = 1 << WUNG_AST_NUM_CHILDREN_SHIFT,
     WUNG_AST_VAR,
 	WUNG_AST_BINARY_OP = 2 << WUNG_AST_NUM_CHILDREN_SHIFT,
     WUNG_AST_ASSIGN,
+    WUNG_AST_ARRAY_ELEM,
 };
 
 wung_ast *wung_ast_create_list(int init_children, int kind, int attr);

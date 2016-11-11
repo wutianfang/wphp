@@ -60,6 +60,9 @@ int wung_lex(wval * val) {
     "=" {return '=';}
     "(" {return '(';}
     ")" {return ')';}
+    "[" {return '[';}
+    "]" {return ']';}
+    "," {return ',';}
     "\$"[a-zA-Z_][a-zA-Z_0-9]* {
         WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -1));
         //printf("val:%s\n", val->value.str->val);
@@ -69,8 +72,8 @@ int wung_lex(wval * val) {
 		return T_WHITESPACE;
 	}
 	[^] {
-		if (YYCURSOR > YYLIMIT) {
 			return T_END;
+		if (YYCURSOR > YYLIMIT) {
 		}
 	}
     */
