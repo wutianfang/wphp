@@ -95,7 +95,8 @@ void wung_compile_binary_op(wnode * result, wung_ast * ast) {
 }
 
 int lookup_cv(wung_op_array * op_array, wung_string *name) {
-    int i=0,name_hash = wung_hash_string(name->val, name->len);
+    int i=0;
+    wung_ulong name_hash = wung_hash_func(name->val, name->len);
     for (i=0; i< op_array->last_var; i++) {
         wung_string * v = op_array->vars[i];
         if (v->len==name->len

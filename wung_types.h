@@ -12,7 +12,12 @@ typedef union _wung_value{
 
 typedef struct _wval{
 	wung_value value;
-	int type_info;
+	uint32_t type_info;
+    union {
+        uint32_t next;
+        uint32_t lineno;
+        uint32_t num_args;
+    }u2;
 }wval;
 
 typedef void (*dtor_func_t)(wval *pDest);
@@ -42,6 +47,9 @@ typedef struct _wung_execute_data wung_execute_data;
     (wval)->value.str = __s; \
 	(wval)->type_info = IS_STRING; \
 }while(0)
+
+#define WVAL_STRING_COMPARE(str1, str2) \
+    ((str1==str2) || (str1->h==str2->h && str1->len==str2->len && memcmp(str1->val, str2->val, str1->len)==0))
 
 #define WVAL_COPY_VALUE(z, v)   \
 	do {						\

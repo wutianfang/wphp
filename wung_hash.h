@@ -5,6 +5,8 @@
 #include "wung_types.h"
 #include "wung_types.h"
 
+
+
 typedef struct _Bucket {
     wval val;
     int h;
@@ -28,6 +30,30 @@ typedef struct _HashTable {
     uint32_t nNextFreeElement; // 新元素指针
     uint32_t nTableMask; //当前掩码
 }HashTable;
+
+#define HASH_FLAG_INITIALIZED      (1<<0)
+#define HASH_FLAG_PACKED           (1<<1)
+
+#define HT_INVALID_IDX ((uint32_t) -1)
+#define HT_MIN_MASK ((uint32_t) -2)
+#define HT_MIN_SIZE 8
+
+#define HT_HASH_SIZE(nTableMask) \
+    (uint32_t)(-(int32_t)(nTableMask)) * sizeof(uint32_t)
+#define HT_DATA_SIZE(nTableSize) \
+    (nTableSize) * sizeof(Bucket)
+#define HT_SIZE(ht) \
+    HT_HASH_SIZE(ht->nTableSize) + HT_DATA_SIZE(ht->nTableSize)
+#define HT_SET_DATA_ADDR(ht, ptr) do { \
+    ht->arData = (Bucket*)((char*)(ptr) + HT_HASH_SIZE(ht->nTableSize)); \
+}while(0);
+
+#define HT_HASH_EX(data, idx)  ((uint32_t*)(data))[(int32_t)(idx)]
+#define HT_HASH(ht, idx)  HT_HASH_EX((ht)->arData, idx)
+
+# define HT_HASH_TO_BUCKET_EX(data, idx) ((data)+(idx))
+# define HT_HASH_TO_BUCKET(ht, idx) ((ht)->arData+(idx))
+    
 
 // 只简单给ht个属性赋初值，nTableSize = 0;
 // 虽然有设置 nTableSize 值，但并没有分配内存
@@ -59,6 +85,7 @@ void wung_hash_add_or_update_i(HashTable * ht,wung_string *key, wval* pData, uin
 // * 添加的新key不能让整个key保持递增  
 // * 根本没有HASH_FLAG_PACKED 标志位
 void wung_hash_index_add_or_update_i(HashTable *ht, uint32_t h, wval* pData, uint32_t flags);
+void wung_hash_index_insert(HashTable *ht, wval *pData);
 
 // 两种类型hashtable相互转化
 void wung_hash_to_packed(HashTable * ht);
@@ -66,9 +93,9 @@ void wung_hash_packed_to_hash(HashTable * ht);
 
 // 两种类型的查找函数
 // 原型 zend_hash_index_find
-wval * wung_hash_index_find(HashTable *ht, uint32_t h);
+Bucket * wung_hash_index_find(HashTable *ht, uint32_t h);
 // 原型 zend_hash_find
-wval * wung_hash_find(const HashTable *ht, wung_string *key);
+Bucket * wung_hash_find(const HashTable *ht, wung_string *key);
 
 // 两种删除
 void zend_hash_del(HashTable *ht, wung_string *key);
