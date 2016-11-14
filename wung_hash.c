@@ -24,8 +24,27 @@ int main(int argc, char* argv[]) {
     printf("%d.\n", bucket->val.value.lval);
     return 0;
 }
+// 把hashtable大小校准到2的n次方
+uint32_t wung_hash_check_size(uint32_t nSize) {
+    if (nSize < HT_MIN_SIZE) {
+        nSize = HT_MIN_SIZE;
+    }
+    // 下面做的，其实就是把最高位之后的每一位置1，
+    // 先把后高位后面一位置1，然后是用最高2位为3、4为置1，然后是用高4位为5、8位置1，以此类推
+    // 用9举例，第一步完了是8（00001000），第二步是12（00001100），
+    // 第三部是15（00001111），后几步值不变，最后+1 就是 16 （00010000）
+    // -1就是为了处理8、16、32这种特殊情况
+    nSize -= 1;
+    nSize |= (nSize >> 1);
+    nSize |= (nSize >> 2);
+    nSize |= (nSize >> 4);
+    nSize |= (nSize >> 8);
+    nSize |= (nSize >> 16);
+    return nSize + 1;
+}
 
 void wung_hash_init(HashTable * ht, int size, dtor_func_t pDestructor) {
+    size = wung_hash_check_size(size);
     ht->u.flags = 0;
     ht->nNumUsed = 0;
     ht->nTableSize = size;
