@@ -64,12 +64,15 @@ char * wung_ast_print_kind(int kind) {
             return "AST_ARRAY";
         case WUNG_AST_ARRAY_ELEM:
             return "AST_ARRAY_ELEM";
+        case WUNG_AST_DIM:
+            return "AST_DIM";
         default:
             return "ERROR";
     }
 }
 
 void wung_ast_print(wung_ast * ast, int level) {
+    return;
     if (!ast) {
         return;
     }

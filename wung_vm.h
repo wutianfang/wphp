@@ -5,6 +5,7 @@
 #include "wung_vm_opcodes.h"
 #include "wung_execute.h"
 #include "wung_compile.h"
+#include "wung_hash.h"
 
 # define USE_OPLINE const wung_op *opline = EX(opline);
 
@@ -16,7 +17,7 @@ static int WUNG_ECHO_HANDLER(wung_execute_data * execute_data ) {
             printf("%s", op1->value.str->val);
             break;
         case IS_LONG:
-            printf("%d", op1->value.lval);
+            printf("%llu", op1->value.lval);
             break;
     }
     return 0;
@@ -85,12 +86,22 @@ static int WUNG_CONCAT_HANDLER(wung_execute_data * execute_data ) {
 }
 
 static int WUNG_INIT_ARRAY_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_INIT_ARRAY_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    HashTable *ht = (HashTable*)malloc(sizeof(HashTable));
+    wung_hash_init(ht, opline->extended_value, NULL);
+    wung_hash_index_insert(ht, op1);
+    WVAL_ARR(result, ht);
     return 0;
 }
 
 static int WUNG_ADD_ARRAY_ELEMENT_HANDLER(wung_execute_data * execute_data ) {
-    printf("WUNG_ADD_ARRAY_ELEMENT_HANDLER\n");
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+
+    wung_hash_index_insert(result->value.arr, op1);
     return 0;
 }
 
@@ -101,6 +112,27 @@ static int WUNG_ASSIGN_HANDLER(wung_execute_data * execute_data ) {
     WVAL_COPY_VALUE(op1, op2);
     return 0;
 }
+
+static int WUNG_FETCH_DIM_R_HANDLER(wung_execute_data * execute_data ) {
+    USE_OPLINE
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+
+    HashTable *ht = W_ARR_P(op1);
+    Bucket * bucket = wung_hash_index_find(ht, W_LVAL_P(op2));
+
+    wval *result = get_val_by_node(opline->result, execute_data);
+    WVAL_COPY_VALUE(result, &(bucket->val));
+    return 0;
+}
+
+static int WUNG_FETCH_DIM_W_HANDLER(wung_execute_data * execute_data ) {
+    USE_OPLINE
+
+    printf("WUNG_FETCH_DIM_W_HANDLER\n");
+    return 0;
+}
+
 static void wung_vm_set_opcode_handler(wung_op* op) {
     switch (op->opcode) {
         case WUNG_ECHO: 
@@ -137,6 +169,14 @@ static void wung_vm_set_opcode_handler(wung_op* op) {
 
         case WUNG_ADD_ARRAY_ELEMENT:
         op->handler = WUNG_ADD_ARRAY_ELEMENT_HANDLER;
+        break;
+
+        case WUNG_FETCH_DIM_R:
+        op->handler = WUNG_FETCH_DIM_R_HANDLER;
+        break;
+
+        case WUNG_FETCH_DIM_W:
+        op->handler = WUNG_FETCH_DIM_W_HANDLER;
         break;
     }
 }

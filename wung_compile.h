@@ -36,6 +36,7 @@ typedef struct _wung_op {
     //const *handler;
     int (*handler)(wung_execute_data * execute_data);
     int lineno;
+    uint32_t extended_value;
 } wung_op;
 
 #define INITIAL_OP_ARRAY_SIZE 64
@@ -62,9 +63,13 @@ typedef struct _wung_op_array {
 wung_op_array * compile_string(char *);
 
 void wung_init_op_array(wung_op_array * op_array);
+
 void wung_compile_expr(wnode * node, wung_ast * ast);
 void wung_compile_var(wnode * node, wung_ast * ast);
+void wung_compile_simple_var(wnode * node, wung_ast * ast);
+void wung_compile_dim(wnode * node, wung_ast * ast);
 void wung_compile_array(wnode * node, wung_ast * ast);
+
 void wung_compile_top_stmt(wung_ast * ast);
 void wung_compile_stmt(wung_ast * ast);
 void wung_compile_echo(wung_ast * ast);

@@ -64,7 +64,13 @@ expr :
     |   array_scalar { $$ = $1;}
     ;
 variable :
-    T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); };
+        T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); }
+    |   T_VARIABLE '[' T_NUMBER ']' { 
+            $$ = wung_ast_create_2_child(
+                WUNG_AST_DIM, 0,
+                wung_ast_create_1_child(WUNG_AST_VAR, 0, $1),
+                $3);
+        }
 
 array_scalar :
         '[' ']' { $$ = wung_ast_create_list(0, WUNG_AST_ARRAY, 0); }
@@ -73,7 +79,7 @@ array_scalar :
 non_empty_array_pair_list :
         non_empty_array_pair_list ',' array_pair {  $$ = wung_ast_add_list($1, $3); }
     |   array_pair {
-            $$ = wung_ast_create_list(1, WUNG_AST_ARRAY, 0);
+            $$ = wung_ast_create_list(10, WUNG_AST_ARRAY, 0);
             wung_ast_add_list($$, $1);
         }
     ;

@@ -9,8 +9,8 @@ void wung_execute_ex(wung_execute_data * execute_data) {
         if (EX(opline)->handler==0) {
             break;
         }
-        wung_print_opline(EX(opline));
-        //(EX(opline)->handler)(execute_data);
+        //wung_print_opline(EX(opline));
+        (EX(opline)->handler)(execute_data);
         WUNG_NEXT_OPCODE;
         if (i++>=max) {
            break;
@@ -44,7 +44,7 @@ wval * get_val_by_node(wnode * node, wung_execute_data * execute_data) {
         return execute_data->func->literals + node->u.var;
 
         default:
-        printf("get_val_by_node error!\n");
+        printf("get_val_by_node error! %d\n", node->op_type);
     }
     wval * ret;
     return ret;

@@ -26,6 +26,7 @@ enum _ast_kind {
 	WUNG_AST_BINARY_OP = 2 << WUNG_AST_NUM_CHILDREN_SHIFT,
     WUNG_AST_ASSIGN,
     WUNG_AST_ARRAY_ELEM,
+    WUNG_AST_DIM,
 };
 
 wung_ast *wung_ast_create_list(int init_children, int kind, int attr);

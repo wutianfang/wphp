@@ -3,6 +3,7 @@
 
 #include "wung.h"
 #include "wung_types.h"
+#include "wung_hash.h"
 #include "wung_compile.h"
 #include "wung_ast.h"
 #include "wung_vm_opcodes.h"

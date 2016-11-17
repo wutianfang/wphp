@@ -3,6 +3,7 @@
 #include "wung_ast.h"
 #include "wung_compile.h"
 #include "wung_execute.h"
+#include "wung_hash.h"
 
 typedef struct _wung_scanner_globals {
     unsigned char *yy_cursor;
@@ -18,7 +19,7 @@ typedef struct _wung_compiler_globals {
 }wung_compiler_globals;
 
 typedef struct _wung_executor_gloabls {
-    wung_array symbol_table;
+    HashTable symbol_table;
     HashTable included_files;
     int exit_status;
 

@@ -3,33 +3,7 @@
 
 #include "wung.h"
 #include "wung_types.h"
-#include "wung_types.h"
 
-
-
-typedef struct _Bucket {
-    wval val;
-    int h;
-    wung_string * key;
-}Bucket;
-
-typedef struct _HashTable {
-    union {
-        struct {
-            char flags;
-            char nApplyCount;
-            char nIteratorsCount;
-            char reserve;
-        } v;
-        uint32_t flags;
-    }u;
-    Bucket * arData;
-    uint32_t nNumUsed; //已使用的大小
-    uint32_t nTableSize; // 容量，nNumUsed >= nTableSize，需重新申请内存 
-    uint32_t nInternalPointer; // 下一个指针位置,迭代器使用
-    uint32_t nNextFreeElement; // 新元素指针
-    uint32_t nTableMask; //当前掩码
-}HashTable;
 
 #define HASH_FLAG_INITIALIZED      (1<<0)
 #define HASH_FLAG_PACKED           (1<<1)
@@ -98,7 +72,7 @@ Bucket * wung_hash_index_find(HashTable *ht, uint32_t h);
 Bucket * wung_hash_find(const HashTable *ht, wung_string *key);
 
 // 两种删除
-void zend_hash_del(HashTable *ht, wung_string *key);
-void zend_hash_index_del(HashTable *ht, uint32_t key);
+void wung_hash_del(HashTable *ht, wung_string *key);
+void wung_hash_index_del(HashTable *ht, uint32_t key);
 
 #endif

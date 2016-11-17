@@ -117,21 +117,48 @@ int lookup_cv(wung_op_array * op_array, wung_string *name) {
 }
 
 void wung_compile_var(wnode * result, wung_ast * ast) {
+    switch(ast->kind) {
+        case WUNG_AST_VAR:
+            wung_compile_simple_var(result, ast);
+            break;
+        case WUNG_AST_DIM:
+            wung_compile_dim(result, ast);
+            break;
+    }
+}
+
+void wung_compile_simple_var(wnode * result, wung_ast * ast) {
     wung_ast * name_ast = ast->child[0];
     wung_string * name = name_ast->val.value.str;
     result->op_type = IS_CV;
     result->u.var = lookup_cv(CG(active_op_array), name);
 }
 
+void wung_compile_dim(wnode * node, wung_ast * ast) {
+    wung_ast * var_ast = ast->child[0];
+    wung_ast * offset_ast = ast->child[1];
+
+    wnode * var_node = (wnode *) malloc(sizeof(wnode));
+    wnode * offset_node = (wnode *) malloc(sizeof(wnode));
+    
+    wung_compile_expr(offset_node, offset_ast);
+    wung_compile_var(var_node, var_ast);
+
+    wung_make_tmp_var(node, CG(active_op_array));
+    wung_op * opline = wung_emit_op(node, WUNG_FETCH_DIM_R, var_node, offset_node);
+}
+
 void wung_compile_array(wnode * result, wung_ast * ast) {
     int i;
     wung_op * opline;
     wnode * node;
+    result->op_type = IS_CV;
     for(i=0; i< ast->children; i++) {
         node = (wnode *) malloc(sizeof(wnode));
         wung_compile_expr(node, ast->child[i]->child[0]);
         if (i==0) {
             opline = wung_emit_op(result, WUNG_INIT_ARRAY, node, NULL); 
+            opline->extended_value = ast->children;
         } else {
             opline = wung_emit_op(result, WUNG_ADD_ARRAY_ELEMENT, node, NULL); 
         }
@@ -150,6 +177,7 @@ void wung_compile_expr(wnode * result, wung_ast * ast) {
             break;
 
         case WUNG_AST_VAR:
+        case WUNG_AST_DIM:
             wung_compile_var(result, ast);            
             break; 
         case WUNG_AST_ARRAY:
@@ -158,6 +186,7 @@ void wung_compile_expr(wnode * result, wung_ast * ast) {
 
         default:
         printf("error kind:%s on wung_compile_expr\n", wung_ast_print_kind(ast->kind));
+        exit(1);
     }
 }
 
@@ -203,6 +232,8 @@ char * opcode2str(int opcode) {
         case WUNG_CONCAT:return "WUNG_CONCAT";
         case WUNG_INIT_ARRAY:return "WUNG_INIT_ARRAY";
         case WUNG_ADD_ARRAY_ELEMENT:return "WUNG_ADD_ARRAY_ELEMENT";
+        case WUNG_FETCH_DIM_R:return "WUNG_FETCH_DIM_R";
+        case WUNG_FETCH_DIM_W:return "WUNG_FETCH_DIM_W";
     }
     return "ERROR";
 }

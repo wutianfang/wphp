@@ -3,6 +3,7 @@
 
 #include "wung_hash.h"
 
+/*
 int main(int argc, char* argv[]) {
     HashTable *ht = (HashTable*)malloc(sizeof(HashTable));
     wung_hash_init(ht, 8, 0);
@@ -21,9 +22,11 @@ int main(int argc, char* argv[]) {
     wung_hash_index_insert(ht, val1);
     wung_hash_index_insert(ht, val2);
     Bucket * bucket = wung_hash_index_find(ht, 0);
-    printf("%d.\n", bucket->val.value.lval);
+    printf("%llu.\n", bucket->val.value.lval);
     return 0;
 }
+*/
+
 // 把hashtable大小校准到2的n次方
 uint32_t wung_hash_check_size(uint32_t nSize) {
     if (nSize < HT_MIN_SIZE) {
