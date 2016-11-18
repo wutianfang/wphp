@@ -1,22 +1,38 @@
 #include "wung_ast.h"
 #include "wung_types.h"
 
-wung_ast * wung_ast_alloc(size_t size) {
-	return (wung_ast*)malloc(size);
+size_t wung_ast_size(uint32_t children_size) {
+    return sizeof(wung_ast) + (children_size-1)*(sizeof(wung_ast*));
+}
+wung_ast * wung_ast_alloc(uint32_t children_size) {
+    size_t total_size = wung_ast_size(children_size);
+	return (wung_ast*)malloc(total_size);
 }
 
-wung_ast * wung_ast_create_list(int init_children, int kind, int attr) {
+wung_ast * wung_ast_create_list(int kind, int attr) {
 	size_t ast_size = sizeof(wung_ast);
-	wung_ast * ast = wung_ast_alloc(ast_size + (init_children-1)*ast_size);
+    uint32_t init_children = 4;
+    wung_ast * ast = wung_ast_alloc(4);
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->children = 0;
+    ast->children_size = init_children;
 	return ast;
 }
 
 wung_ast * wung_ast_add_list(wung_ast * ast, wung_ast * op) {
-	ast->child[ast->children++] = op;
-	return ast;
+    wung_ast * ret_ast;
+    if (ast->children_size <= ast->children) {
+        size_t old_size = wung_ast_size(ast->children_size);
+        ast->children_size += ast->children_size;
+        ret_ast = wung_ast_alloc(ast->children_size);
+        memcpy(ret_ast, ast, old_size);
+        free(ast);
+    } else {
+        ret_ast = ast;
+    }
+	ret_ast->child[ret_ast->children++] = op;
+	return ret_ast;
 }
 wung_ast * wung_ast_create_val(wval * val) {
 	wung_ast * ast = wung_ast_alloc(sizeof(wung_ast));

@@ -10,6 +10,7 @@ struct _wung_ast {
 	int attr;
 	wval val;
 	int children;
+    int children_size;
 	wung_ast *child[1];
 };
 
@@ -29,7 +30,7 @@ enum _ast_kind {
     WUNG_AST_DIM,
 };
 
-wung_ast *wung_ast_create_list(int init_children, int kind, int attr);
+wung_ast *wung_ast_create_list(int kind, int attr);
 wung_ast *wung_ast_add_list(wung_ast * ast, wung_ast * op);
 wung_ast *wung_ast_create_val(wval * val);
 wung_ast *wung_ast_create_1_child(int kind, int attr, wung_ast * child1);

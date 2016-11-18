@@ -42,7 +42,7 @@ start:
 		top_statement_list top_statement {
             $$ = wung_ast_add_list($1, $2);
         }
-	|	{ $$ = wung_ast_create_list(64, WUNG_AST_LIST, 0);}
+	|	{ $$ = wung_ast_create_list(WUNG_AST_LIST, 0);}
 	;
 top_statement:
     statement { $$ = $1; }
@@ -73,14 +73,14 @@ variable :
         }
 
 array_scalar :
-        '[' ']' { $$ = wung_ast_create_list(0, WUNG_AST_ARRAY, 0); }
+        '[' ']' { $$ = wung_ast_create_list(WUNG_AST_ARRAY, 0); }
     |   '[' non_empty_array_pair_list ']' { $$ = $2; }
     ;
 non_empty_array_pair_list :
         non_empty_array_pair_list ',' array_pair {  $$ = wung_ast_add_list($1, $3); }
     |   array_pair {
-            $$ = wung_ast_create_list(10, WUNG_AST_ARRAY, 0);
-            wung_ast_add_list($$, $1);
+            $$ = wung_ast_create_list(WUNG_AST_ARRAY, 0);
+            $$ = wung_ast_add_list($$, $1);
         }
     ;
 array_pair :
