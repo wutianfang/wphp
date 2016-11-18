@@ -62,7 +62,7 @@ wung_ast * wung_ast_create_2_child(int kind, int attr, wung_ast * child1, wung_a
 
 	return ast;
 }
-char * wung_ast_print_kind(int kind) {
+const char * wung_ast_print_kind(int kind) {
     switch(kind) {
         case WUNG_AST_ZVAL:
             return "AST_ZVAL";
@@ -92,11 +92,12 @@ void wung_ast_print(wung_ast * ast, int level) {
     if (!ast) {
         return;
     }
-    for (int i=0; i<level; i++) {
+    int i=0;
+    for (i=0; i<level; i++) {
         printf("\t");
     }
     printf("kind: %s attr: %d (%p)\n", wung_ast_print_kind(ast->kind), ast->attr, ast);
-    for (int i=0; i< ast->children; i++) {
+    for (i=0; i< ast->children; i++) {
         wung_ast_print(ast->child[i], level+1);
     }
 }

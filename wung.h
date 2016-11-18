@@ -16,7 +16,7 @@ typedef struct _wung_string{
     wung_ulong h;
 } wung_string;
 
-static wung_string * wung_string_init(char * str, int len) {
+static wung_string * wung_string_init(const char * str, int len) {
     wung_string *s =  (wung_string*) malloc(sizeof(wung_string) + len+10);
     memcpy(s->val, str, len);
     s->len = len;

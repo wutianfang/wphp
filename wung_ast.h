@@ -36,5 +36,5 @@ wung_ast *wung_ast_create_val(wval * val);
 wung_ast *wung_ast_create_1_child(int kind, int attr, wung_ast * child1);
 wung_ast *wung_ast_create_2_child(int kind, int attr, wung_ast * child1, wung_ast * child2);
 void wung_ast_print(wung_ast * ast, int level);
-char * wung_ast_print_kind(int kind);
+const char * wung_ast_print_kind(int kind);
 #endif

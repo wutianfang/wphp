@@ -23,8 +23,8 @@ int wung_execute(wung_op_array * op_array) {
 
 void init_execute_data(wung_execute_data * execute_data, wung_op_array *op_array) {
     execute_data->opline = op_array->opcodes;
-    execute_data->vars = malloc(sizeof(wval)*op_array->last_var);
-    execute_data->temp_vars = malloc(sizeof(wval)*op_array->T);
+    execute_data->vars = (wval*)malloc(sizeof(wval)*op_array->last_var);
+    execute_data->temp_vars = (wval*)malloc(sizeof(wval)*op_array->T);
     execute_data->func = op_array;
 }
 

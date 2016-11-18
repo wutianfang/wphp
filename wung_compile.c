@@ -27,7 +27,7 @@ int wung_add_literal(wung_op_array * op_array, wval * val) {
     int i = op_array->last_literal++;
     if (op_array->last_literal >= op_array->literal_size) {
         op_array->literal_size += 16;
-        op_array->literals = realloc(
+        op_array->literals = (wval*)realloc(
             op_array->literals, 
             op_array->literal_size * sizeof(wval)
         );
@@ -107,7 +107,7 @@ int lookup_cv(wung_op_array * op_array, wung_string *name) {
     op_array->last_var = i+1;
     if (i>=op_array->var_size) {
         op_array->var_size += 16;
-        op_array->vars = realloc(
+        op_array->vars = (wung_string**)realloc(
             op_array->vars,
             sizeof(wung_string) * op_array->var_size
         );
@@ -195,7 +195,7 @@ wung_op * get_next_op(wung_op_array * op_array) {
     op_array->last++;
     if (op_array->last>=op_array->opcode_size) {
         op_array->opcode_size *= 4;
-        op_array->opcodes = realloc(op_array->opcodes, sizeof(wung_op) * op_array->opcode_size);
+        op_array->opcodes = (wung_op*)realloc(op_array->opcodes, sizeof(wung_op) * op_array->opcode_size);
     }
     return op_array->opcodes + op_array->last-1;
 }
@@ -221,7 +221,7 @@ void pass_two(wung_op_array * op_array) {
     }
 }
 
-char * opcode2str(int opcode) {
+const char * opcode2str(int opcode) {
     switch(opcode) {
         case WUNG_ECHO:return "WUNG_ECHO";
         case WUNG_ADD:return "WUNG_ADD\t";
@@ -237,7 +237,7 @@ char * opcode2str(int opcode) {
     }
     return "ERROR";
 }
-char * wnode_type_2_str(char type) {
+const char * wnode_type_2_str(char type) {
     switch(type) {
         case IS_CONST:return "CONST";
         case IS_TMP_VAR:return "TMP_VAR";
@@ -249,7 +249,7 @@ char * wnode_type_2_str(char type) {
 }
 
 void wung_print_opline(const wung_op * opline) {
-    char * opcode = opcode2str(opline->opcode);
+    const char * opcode = opcode2str(opline->opcode);
     printf("opline:%s\t%s:%d", 
             opcode2str(opline->opcode),
             wnode_type_2_str(opline->op1->op_type),
