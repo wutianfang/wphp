@@ -8,7 +8,7 @@ void wung_execute_ex(wung_execute_data * execute_data) {
         if (EX(opline)->handler==0) {
             break;
         }
-        //wung_print_opline(EX(opline));
+        wung_print_opline(EX(opline));
         (EX(opline)->handler)(execute_data);
         WUNG_NEXT_OPCODE;
     }
@@ -29,6 +29,9 @@ void init_execute_data(wung_execute_data * execute_data, wung_op_array *op_array
 }
 
 wval * get_val_by_node(wnode * node, wung_execute_data * execute_data) {
+    if (node==NULL) {
+        return NULL;
+    }
     switch(node->op_type) {
         case IS_TMP_VAR:
         return execute_data->temp_vars + node->u.var;
@@ -38,6 +41,9 @@ wval * get_val_by_node(wnode * node, wung_execute_data * execute_data) {
 
         case IS_CONST:
         return execute_data->func->literals + node->u.var;
+
+        case IS_UNUSED:
+        return NULL;
 
         default:
         printf("get_val_by_node error! %d\n", node->op_type);

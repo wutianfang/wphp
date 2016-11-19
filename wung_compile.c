@@ -84,7 +84,11 @@ void wung_compile_assign(wung_ast * ast) {
             offset_node = (wnode*) malloc(sizeof(wnode));
 
             wung_compile_var(left_node, left_ast->child[0]);
-            wung_compile_expr(offset_node, left_ast->child[1]);
+            if (left_ast->child[1]==NULL) {
+                offset_node->op_type=IS_UNUSED;
+            } else {
+                wung_compile_expr(offset_node, left_ast->child[1]);
+            }
             wung_emit_op(NULL, WUNG_ASSIGN_DIM, left_node, offset_node);
 
             wung_emit_op(NULL, WUNG_OP_DATA, right_node, NULL);
@@ -180,6 +184,10 @@ void wung_compile_array(wnode * result, wung_ast * ast) {
             opline = wung_emit_op(result, WUNG_ADD_ARRAY_ELEMENT, node, NULL); 
         }
     }
+    if (ast->children==0) {
+        opline = wung_emit_op(result, WUNG_INIT_ARRAY, NULL, NULL); 
+        opline->extended_value = 0;
+    }
 }
 
 void wung_compile_expr(wnode * result, wung_ast * ast) {
@@ -269,26 +277,31 @@ const char * wnode_type_2_str(char type) {
 
 void wung_print_opline(const wung_op * opline) {
     const char * opcode = opcode2str(opline->opcode);
-    printf("opline:%s\t%s:%d", 
-            opcode2str(opline->opcode),
-            wnode_type_2_str(opline->op1->op_type),
-            opline->op1->u.constant
-    ); 
+    printf("opline:%-30s", opcode2str(opline->opcode)); 
 
-    if(opline->op2) {
-        printf("\t%s:%d\t",
-            wnode_type_2_str(opline->op2->op_type),
-            opline->op2->u.constant
-        );
-    } else {
-        printf("\t");
-    }
     if(opline->result) {
-        printf("\t%s:%d\n",
+        printf("|%10s:%-5d",
             wnode_type_2_str(opline->result->op_type),
             opline->result->u.constant
         );
     } else {
-        printf("\n");
+        printf("!%16s", " ");
+    }
+
+    if(opline->op1) {
+        printf("|%10s:%-5d",
+            wnode_type_2_str(opline->op1->op_type),
+            opline->op1->u.constant
+        );
+    } else {
+        printf("|%16s", " ");
+    }
+    if(opline->op2) {
+        printf("%10s:%-5d\n",
+            wnode_type_2_str(opline->op2->op_type),
+            opline->op2->u.constant
+        );
+    } else {
+        printf("%16s\n", " ");
     }
 }

@@ -91,7 +91,9 @@ static int WUNG_INIT_ARRAY_HANDLER(wung_execute_data * execute_data ) {
     wval *result = get_val_by_node(opline->result, execute_data);
     HashTable *ht = (HashTable*)malloc(sizeof(HashTable));
     wung_hash_init(ht, opline->extended_value, NULL);
-    wung_hash_index_insert(ht, op1);
+    if (op1!=NULL) {
+        wung_hash_index_insert(ht, op1);
+    }
     WVAL_ARR(result, ht);
     return 0;
 }
@@ -141,9 +143,12 @@ static int WUNG_ASSIGN_DIM_HANDLER(wung_execute_data * execute_data ) {
     wval *value_ptr = get_val_by_node((opline+1)->op1, execute_data);
 
     HashTable *ht = W_ARR_P(var_ptr);
-    Bucket * bucket = wung_hash_index_find(ht, W_LVAL_P(dim_ptr));
-
-    WVAL_COPY_VALUE(&(bucket->val), value_ptr);
+    if (dim_ptr==NULL) {
+        wung_hash_index_insert(ht, value_ptr);
+    } else {
+        Bucket * bucket = wung_hash_index_find(ht, W_LVAL_P(dim_ptr));
+        WVAL_COPY_VALUE(&(bucket->val), value_ptr);
+    }
 
     return 0;
 }

@@ -71,6 +71,12 @@ variable :
                 wung_ast_create_1_child(WUNG_AST_VAR, 0, $1),
                 $3);
         }
+    |  T_VARIABLE '[' ']' {
+            $$ = wung_ast_create_2_child(
+                WUNG_AST_DIM, 0,
+                wung_ast_create_1_child(WUNG_AST_VAR, 0, $1),
+                NULL);
+        }
 
 array_scalar :
         '[' ']' { $$ = wung_ast_create_list(WUNG_AST_ARRAY, 0); }
