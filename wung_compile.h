@@ -17,6 +17,14 @@ typedef union _parse_ele {
 #define IS_UNUSED   (1<<3)  /* Unused variable */
 #define IS_CV       (1<<4)  /* Compiled variable */
 
+#define BP_VAR_R            0
+#define BP_VAR_W            1
+#define BP_VAR_RW           2
+#define BP_VAR_IS           3
+#define BP_VAR_FUNC_ARG     4
+#define BP_VAR_UNSET        5
+#define BP_VAR_REF          6
+
 typedef struct _wnode {
     char op_type;
     char flag;

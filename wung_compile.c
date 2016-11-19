@@ -71,11 +71,28 @@ void wung_compile_assign(wung_ast * ast) {
 
     wnode * right_node = (wnode *) malloc(sizeof(wnode));
     wnode * left_node = (wnode *) malloc(sizeof(wnode));
-    
-    wung_compile_expr(right_node, right_ast);
-    wung_compile_var(left_node, left_ast);
+    wnode * offset_node;
 
-    wung_op * opline = wung_emit_op(NULL, WUNG_ASSIGN, left_node, right_node);
+    wung_compile_expr(right_node, right_ast);
+    switch(left_ast->kind) {
+        case WUNG_AST_VAR:
+            wung_compile_var(left_node, left_ast);
+            wung_emit_op(NULL, WUNG_ASSIGN, left_node, right_node);
+            break;
+
+        case WUNG_AST_DIM:
+            offset_node = (wnode*) malloc(sizeof(wnode));
+
+            wung_compile_var(left_node, left_ast->child[0]);
+            wung_compile_expr(offset_node, left_ast->child[1]);
+            wung_emit_op(NULL, WUNG_ASSIGN_DIM, left_node, offset_node);
+
+            wung_emit_op(NULL, WUNG_OP_DATA, right_node, NULL);
+            break;
+
+        default:
+            printf("error assign type %s .", wung_ast_print_kind(ast->kind));
+    }
 }
 
 void wung_compile_binary_op(wnode * result, wung_ast * ast) {
@@ -234,6 +251,8 @@ const char * opcode2str(int opcode) {
         case WUNG_ADD_ARRAY_ELEMENT:return "WUNG_ADD_ARRAY_ELEMENT";
         case WUNG_FETCH_DIM_R:return "WUNG_FETCH_DIM_R";
         case WUNG_FETCH_DIM_W:return "WUNG_FETCH_DIM_W";
+        case WUNG_ASSIGN_DIM:return "WUNG_ASSIGN_DIM";
+        case WUNG_OP_DATA:return "WUNG_OP_DATA";
     }
     return "ERROR";
 }

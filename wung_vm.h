@@ -133,6 +133,25 @@ static int WUNG_FETCH_DIM_W_HANDLER(wung_execute_data * execute_data ) {
     return 0;
 }
 
+static int WUNG_ASSIGN_DIM_HANDLER(wung_execute_data * execute_data ) {
+    USE_OPLINE
+
+    wval *var_ptr = get_val_by_node(opline->op1, execute_data);
+    wval *dim_ptr = get_val_by_node(opline->op2, execute_data);
+    wval *value_ptr = get_val_by_node((opline+1)->op1, execute_data);
+
+    HashTable *ht = W_ARR_P(var_ptr);
+    Bucket * bucket = wung_hash_index_find(ht, W_LVAL_P(dim_ptr));
+
+    WVAL_COPY_VALUE(&(bucket->val), value_ptr);
+
+    return 0;
+}
+
+static int WUNG_OP_DATA_HANDLER(wung_execute_data * execute_data ) {
+    return 0;
+}
+
 static void wung_vm_set_opcode_handler(wung_op* op) {
     switch (op->opcode) {
         case WUNG_ECHO: 
@@ -177,6 +196,14 @@ static void wung_vm_set_opcode_handler(wung_op* op) {
 
         case WUNG_FETCH_DIM_W:
         op->handler = WUNG_FETCH_DIM_W_HANDLER;
+        break;
+
+        case WUNG_ASSIGN_DIM:
+        op->handler = WUNG_ASSIGN_DIM_HANDLER;
+        break;
+
+        case WUNG_OP_DATA:
+        op->handler = WUNG_OP_DATA_HANDLER;
         break;
     }
 }
