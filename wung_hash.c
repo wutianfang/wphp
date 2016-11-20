@@ -51,8 +51,8 @@ void wung_hash_init(HashTable * ht, int size, dtor_func_t pDestructor) {
     ht->u.flags = 0;
     ht->nNumUsed = 0;
     ht->nTableSize = size;
-    ht->nInternalPointer = 0;
     ht->nNextFreeElement = 0;
+    ht->nNumOfElements = 0;
     ht->nTableMask = 0;
     ht->arData = NULL;
 }
@@ -64,8 +64,14 @@ void wung_hash_real_init(HashTable * ht, int packed) {
     } else {
         ht->u.v.flags |= HASH_FLAG_INITIALIZED;
         ht->nTableMask = -ht->nTableSize;
-        HT_SET_DATA_ADDR(ht, malloc(HT_SIZE(ht)));
-        memset(&HT_HASH(ht, ht->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht->nTableMask)); 
+        size_t arDataLen = HT_SIZE(ht);
+        Bucket * arData = malloc(arDataLen);
+        HT_SET_DATA_ADDR(ht, arData);
+        memset(
+            &HT_HASH(ht, ht->nTableMask),
+            HT_INVALID_IDX,
+            HT_HASH_SIZE(ht->nTableMask)
+        ); 
     }
 }
 
@@ -78,14 +84,16 @@ void wung_hash_check_init(HashTable * ht, int packed) {
 
 void wung_hash_add_or_update_i(HashTable * ht,wung_string *key, wval* pData, uint32_t flags) {
     Bucket *p;
-    if (ht->u.flags & HASH_FLAG_INITIALIZED) {
+    if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+        wung_hash_check_init(ht, 0);
+    } else if(ht->u.flags & HASH_FLAG_PACKED) {
+        wung_hash_packed_to_hash(ht);
+    } else {
         p = wung_hash_find(ht, key);
         if (p) {
             WVAL_COPY_VALUE(&(p->val), pData);
             return; 
         }
-    } else {
-        wung_hash_check_init(ht, 0);
     }
 
     wung_ulong h = wung_hash_string(key);
@@ -118,14 +126,90 @@ Bucket * wung_hash_find(const HashTable *ht, wung_string *key) {
     return NULL;
 }
 
-void wung_hash_index_insert(HashTable *ht, wval *pData) {
-    Bucket *p;
+
+wval * wung_hash_index_add_or_update_i(HashTable *ht, uint32_t h, wval* pData, uint32_t flags) {
+    Bucket *target_ptr;
     if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-        wung_hash_check_init(ht, 1);
+        wung_hash_check_init(ht, h < ht->nTableSize);
+        if (h < ht->nTableSize) {
+            target_ptr = ht->arData + h;
+            goto add_to_pack;
+        }
+    } else if (ht->u.flags & HASH_FLAG_PACKED) {
+        target_ptr = ht->arData + h;
+        if (h < ht->nNumUsed ) {
+            if (W_TYPE(target_ptr->val)==IS_UNDEF) {
+                wung_hash_packed_to_hash(ht);
+                goto add_to_hash;
+            } else {
+                goto update_to_pack;
+            }
+        } else if (h < ht->nTableSize) {
+            goto add_to_pack;
+        } else if ( (h>>1) < ht->nTableSize && (ht->nTableSize>>1) < ht->nNumOfElements) {
+            wung_hash_packed_grow(ht);
+            goto add_to_pack;
+        } else {
+            wung_hash_packed_to_hash(ht);
+            goto add_to_hash;
+        }
+    } else {
+        target_ptr = wung_hash_index_find(ht, h);
+        if (target_ptr==NULL) {
+            goto add_to_hash;
+        } else {
+            goto update_to_hash;
+        }
+    }
+
+update_to_pack:
+    WVAL_COPY_VALUE(&(target_ptr->val), pData);
+    ht->nNextFreeElement = h+1;
+    return &target_ptr->val;
+
+update_to_hash:
+    WVAL_COPY_VALUE(&(target_ptr->val), pData);
+    // php源码里，有语句，如果h> nNextFreeElement，则更新nNextFreeElement。
+    // 但是没想明白，什么情况下， 会 h> nNextFreeElement ？
+    return &target_ptr->val;
+
+add_to_pack:
+    if (h > ht->nNumUsed) {
+        Bucket * temp_ptr = ht->arData + ht->nNumUsed;
+        while( temp_ptr!=target_ptr) {
+            WVAL_UNDEF(&temp_ptr->val);
+            temp_ptr++;
+        }
+    }
+    WVAL_COPY_VALUE(&(target_ptr->val), pData);
+    target_ptr->key = NULL;
+    target_ptr->h = h;
+    ht->nNumUsed = h+1;
+    ht->nNumOfElements++;
+    if (h >= ht->nNextFreeElement) {
+        ht->nNextFreeElement = h+1;
+    }
+    return &target_ptr->val;    
+
+add_to_hash:
+    ht->nNumOfElements++;
+    if (h >= ht->nNextFreeElement) {
+        ht->nNextFreeElement = h+1;
     }
     uint32_t idx = ht->nNumUsed++;
-    p = ht->arData + idx;
-    WVAL_COPY_VALUE(&(p->val), pData);
+    target_ptr = ht->arData + idx;
+    WVAL_COPY_VALUE(&(target_ptr->val), pData);
+    target_ptr->key = NULL;
+    target_ptr->h = h;
+    uint32_t nIndex = h|ht->nTableMask;
+    W_NEXT(target_ptr->val) = HT_HASH(ht, nIndex);
+    HT_HASH(ht, ht->nNumUsed);
+    return &target_ptr->val;    
+}
+
+
+void wung_hash_index_insert(HashTable *ht, wval *pData) {
+    wung_hash_index_add_or_update_i(ht, ht->nNextFreeElement++, pData, 0);
 }
 
 Bucket * wung_hash_index_find(HashTable *ht, uint32_t h) {
@@ -135,4 +219,25 @@ Bucket * wung_hash_index_find(HashTable *ht, uint32_t h) {
     return ht->arData + h;
 }
 
+void wung_hash_packed_to_hash(HashTable * ht) {
+    ht->u.flags &= ~HASH_FLAG_PACKED;
 
+    Bucket* oldArData = ht->arData;
+    ht->nTableMask = -ht->nTableSize;
+    HT_SET_DATA_ADDR(ht, malloc(HT_SIZE(ht)));
+    memcpy(ht->arData, oldArData ,  sizeof(Bucket) * ht->nNumUsed);
+    free(oldArData);
+
+    memset(&(HT_HASH(ht, ht->nTableMask)), HT_INVALID_IDX, HT_HASH_SIZE(ht->nTableMask)); 
+    wung_hash_rehash(ht);
+}
+
+void wung_hash_rehash(HashTable * ht) {
+    printf("wung_hash_rehash\n");
+    exit(0);
+}
+
+void wung_hash_packed_grow(HashTable * ht) {
+    printf("wung_hash_packed_grow\n");
+    exit(0);
+}

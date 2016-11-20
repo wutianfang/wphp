@@ -25,6 +25,7 @@ void yyerror (char const *);
 %token <ast>T_INPUT_ERROR
 %token <ast>T_LOWER_CHAR
 %token <ast>T_UPPER_CHAR
+%token <ast>T_DOUBLE_ARROW
 %token T_END  0
 %token T_WHITESPACE
 %left '+' '-'
@@ -65,7 +66,7 @@ expr :
     ;
 variable :
         T_VARIABLE  { $$ = wung_ast_create_1_child(WUNG_AST_VAR ,0, $1); }
-    |   T_VARIABLE '[' T_NUMBER ']' { 
+    |   T_VARIABLE '[' expr ']' { 
             $$ = wung_ast_create_2_child(
                 WUNG_AST_DIM, 0,
                 wung_ast_create_1_child(WUNG_AST_VAR, 0, $1),
@@ -91,6 +92,7 @@ non_empty_array_pair_list :
     ;
 array_pair :
         expr { $$ = wung_ast_create_2_child(WUNG_AST_ARRAY_ELEM, 0, $1, NULL); }
+    |   expr T_DOUBLE_ARROW expr {$$ = wung_ast_create_2_child(WUNG_AST_ARRAY_ELEM, 0, $3, $1); }
     ;
 
 %%

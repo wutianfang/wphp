@@ -87,12 +87,17 @@ static int WUNG_CONCAT_HANDLER(wung_execute_data * execute_data ) {
 
 static int WUNG_INIT_ARRAY_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
-    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *val_ptr = get_val_by_node(opline->op1, execute_data);
+    wval *key_ptr = get_val_by_node(opline->op2, execute_data);
     wval *result = get_val_by_node(opline->result, execute_data);
     HashTable *ht = (HashTable*)malloc(sizeof(HashTable));
     wung_hash_init(ht, opline->extended_value, NULL);
-    if (op1!=NULL) {
-        wung_hash_index_insert(ht, op1);
+    if (val_ptr!=NULL) {
+        if (key_ptr!=NULL) {
+            wung_hash_add_or_update_i(ht, W_STR_P(key_ptr), val_ptr, 0);
+        } else {
+            wung_hash_index_insert(ht, val_ptr);
+        }
     }
     WVAL_ARR(result, ht);
     return 0;
@@ -100,10 +105,15 @@ static int WUNG_INIT_ARRAY_HANDLER(wung_execute_data * execute_data ) {
 
 static int WUNG_ADD_ARRAY_ELEMENT_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
-    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *val_ptr = get_val_by_node(opline->op1, execute_data);
+    wval *key_ptr = get_val_by_node(opline->op2, execute_data);
     wval *result = get_val_by_node(opline->result, execute_data);
 
-    wung_hash_index_insert(result->value.arr, op1);
+    if (key_ptr!=NULL) {
+        wung_hash_add_or_update_i(W_ARR_P(result), W_STR_P(key_ptr), val_ptr, 0);
+    } else {
+        wung_hash_index_insert(W_ARR_P(result), val_ptr);
+    }
     return 0;
 }
 
@@ -118,10 +128,18 @@ static int WUNG_ASSIGN_HANDLER(wung_execute_data * execute_data ) {
 static int WUNG_FETCH_DIM_R_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
     wval *op1 = get_val_by_node(opline->op1, execute_data);
-    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *key_ptr = get_val_by_node(opline->op2, execute_data);
 
     HashTable *ht = W_ARR_P(op1);
-    Bucket * bucket = wung_hash_index_find(ht, W_LVAL_P(op2));
+    Bucket * bucket;
+    switch(W_TYPE_P(key_ptr)) {
+        case IS_LONG:
+            bucket = wung_hash_index_find(ht, W_LVAL_P(key_ptr));
+            break;
+        case IS_STRING:
+            bucket = wung_hash_find(ht, W_STR_P(key_ptr));
+            break;
+    }
 
     wval *result = get_val_by_node(opline->result, execute_data);
     WVAL_COPY_VALUE(result, &(bucket->val));
@@ -146,8 +164,15 @@ static int WUNG_ASSIGN_DIM_HANDLER(wung_execute_data * execute_data ) {
     if (dim_ptr==NULL) {
         wung_hash_index_insert(ht, value_ptr);
     } else {
-        Bucket * bucket = wung_hash_index_find(ht, W_LVAL_P(dim_ptr));
-        WVAL_COPY_VALUE(&(bucket->val), value_ptr);
+        Bucket * bucket;
+        switch(W_TYPE_P(dim_ptr)) {
+            case IS_LONG:
+                wung_hash_index_add_or_update_i(ht, W_LVAL_P(dim_ptr), value_ptr, 0);
+                break;
+            case IS_STRING:
+                wung_hash_add_or_update_i(ht, W_STR_P(dim_ptr), value_ptr, 0);
+                break;
+        }
     }
 
     return 0;

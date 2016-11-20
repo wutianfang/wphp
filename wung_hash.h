@@ -14,12 +14,13 @@
 
 #define HT_HASH_SIZE(nTableMask) \
     (uint32_t)(-(int32_t)(nTableMask)) * sizeof(uint32_t)
+    //(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
 #define HT_DATA_SIZE(nTableSize) \
     (nTableSize) * sizeof(Bucket)
 #define HT_SIZE(ht) \
-    HT_HASH_SIZE(ht->nTableSize) + HT_DATA_SIZE(ht->nTableSize)
+    HT_HASH_SIZE(ht->nTableMask) + HT_DATA_SIZE(ht->nTableSize)
 #define HT_SET_DATA_ADDR(ht, ptr) do { \
-    ht->arData = (Bucket*)((char*)(ptr) + HT_HASH_SIZE(ht->nTableSize)); \
+    ht->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE(ht->nTableMask)); \
 }while(0);
 
 #define HT_HASH_EX(data, idx)  ((uint32_t*)(data))[(int32_t)(idx)]
@@ -58,12 +59,17 @@ void wung_hash_add_or_update_i(HashTable * ht,wung_string *key, wval* pData, uin
 // * h 过大
 // * 添加的新key不能让整个key保持递增  
 // * 根本没有HASH_FLAG_PACKED 标志位
-void wung_hash_index_add_or_update_i(HashTable *ht, uint32_t h, wval* pData, uint32_t flags);
+wval * wung_hash_index_add_or_update_i(HashTable *ht, uint32_t h, wval* pData, uint32_t flags);
 void wung_hash_index_insert(HashTable *ht, wval *pData);
 
 // 两种类型hashtable相互转化
 void wung_hash_to_packed(HashTable * ht);
 void wung_hash_packed_to_hash(HashTable * ht);
+
+// 内存重新分配
+void wung_hash_do_resize(HashTable * ht);
+void wung_hash_packed_grow(HashTable * ht);
+void wung_hash_rehash(HashTable * ht);
 
 // 两种类型的查找函数
 // 原型 zend_hash_index_find

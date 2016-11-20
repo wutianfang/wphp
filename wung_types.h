@@ -42,10 +42,10 @@ struct _HashTable {
         uint32_t flags;
     }u;
     Bucket * arData;
-    uint32_t nNumUsed; //已使用的大小
-    uint32_t nTableSize; // 容量，nNumUsed >= nTableSize，需重新申请内存 
-    uint32_t nInternalPointer; // 下一个指针位置,迭代器使用
-    uint32_t nNextFreeElement; // 新元素指针
+    uint32_t nNumUsed; // 下一个可用的槽位指针
+    uint32_t nNumOfElements; // arData中真正存储的数据量，小余等于nNumUsed的值
+    uint32_t nNextFreeElement; // 下一个可用的自增key
+    uint32_t nTableSize; // 真正的表容量
     uint32_t nTableMask; //当前掩码
 };
 
@@ -88,11 +88,21 @@ typedef struct _wung_execute_data wung_execute_data;
 	do {						\
 		memcpy(z, v, sizeof(wval)); \
 	}while(0)
+
+#define W_TYPE(zval) (zval).type_info
+#define W_TYPE_P(zval_p)  W_TYPE(*(zval_p))
+
+#define W_NEXT(zval) (zval).u2.next
+#define W_NEXT_P(zval_p)  W_NEXT_P(*(zval_p))
+
 #define W_LVAL(zval) (zval).value.lval
 #define W_LVAL_P(zval_p)  W_LVAL(*(zval_p))
 
 #define W_ARR(zval)  (zval).value.arr
 #define W_ARR_P(zval_p)  W_ARR(*(zval_p))
+
+#define W_STR(zval) (zval).value.str
+#define W_STR_P(zval_p)  W_STR(*(zval_p))
 
 
 #endif

@@ -172,16 +172,23 @@ void wung_compile_dim(wnode * node, wung_ast * ast) {
 void wung_compile_array(wnode * result, wung_ast * ast) {
     int i;
     wung_op * opline;
-    wnode * node;
+    wnode * key_node,*val_node;
     result->op_type = IS_CV;
     for(i=0; i< ast->children; i++) {
-        node = (wnode *) malloc(sizeof(wnode));
-        wung_compile_expr(node, ast->child[i]->child[0]);
+        val_node = (wnode *) malloc(sizeof(wnode));
+        
+        wung_compile_expr(val_node, ast->child[i]->child[0]);
+        if (ast->child[i]->child[1]==NULL) {
+            key_node = NULL;
+        } else {
+            key_node = (wnode *) malloc(sizeof(wnode));
+            wung_compile_expr(key_node, ast->child[i]->child[1]);
+        }
         if (i==0) {
-            opline = wung_emit_op(result, WUNG_INIT_ARRAY, node, NULL); 
+            opline = wung_emit_op(result, WUNG_INIT_ARRAY, val_node, key_node); 
             opline->extended_value = ast->children;
         } else {
-            opline = wung_emit_op(result, WUNG_ADD_ARRAY_ELEMENT, node, NULL); 
+            opline = wung_emit_op(result, WUNG_ADD_ARRAY_ELEMENT, val_node, key_node); 
         }
     }
     if (ast->children==0) {
