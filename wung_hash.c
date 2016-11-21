@@ -174,6 +174,7 @@ update_to_hash:
     return &target_ptr->val;
 
 add_to_pack:
+    target_ptr = ht->arData + h;
     if (h > ht->nNumUsed) {
         Bucket * temp_ptr = ht->arData + ht->nNumUsed;
         while( temp_ptr!=target_ptr) {
@@ -228,16 +229,20 @@ void wung_hash_packed_to_hash(HashTable * ht) {
     memcpy(ht->arData, oldArData ,  sizeof(Bucket) * ht->nNumUsed);
     free(oldArData);
 
-    memset(&(HT_HASH(ht, ht->nTableMask)), HT_INVALID_IDX, HT_HASH_SIZE(ht->nTableMask)); 
     wung_hash_rehash(ht);
 }
 
 void wung_hash_rehash(HashTable * ht) {
+    HT_HASH_RESET(ht);
     printf("wung_hash_rehash\n");
     exit(0);
 }
 
 void wung_hash_packed_grow(HashTable * ht) {
-    printf("wung_hash_packed_grow\n");
-    exit(0);
+    Bucket * old_bucket = ht->arData;
+    size_t old_data_size = HT_DATA_SIZE(ht->nTableSize);
+    ht->nTableSize += ht->nTableSize;
+    ht->arData = (Bucket*)malloc(HT_DATA_SIZE(ht->nTableSize));
+    memcpy(ht->arData, old_bucket, old_data_size);
+    free(old_bucket);
 }

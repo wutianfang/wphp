@@ -22,6 +22,8 @@
 #define HT_SET_DATA_ADDR(ht, ptr) do { \
     ht->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE(ht->nTableMask)); \
 }while(0);
+#define HT_HASH_RESET(ht) \
+    memset(&(HT_HASH(ht, ht->nTableMask)), HT_INVALID_IDX, HT_HASH_SIZE(ht->nTableMask));
 
 #define HT_HASH_EX(data, idx)  ((uint32_t*)(data))[(int32_t)(idx)]
 #define HT_HASH(ht, idx)  HT_HASH_EX((ht)->arData, idx)
