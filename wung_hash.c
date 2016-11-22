@@ -103,7 +103,7 @@ void wung_hash_add_or_update_i(HashTable * ht,wung_string *key, wval* pData, uin
     p->key = key;
     p->h = h;
     uint32_t nIndex = h|ht->nTableMask;
-    pData->u2.next = HT_HASH(ht, nIndex);
+    W_NEXT(p->val) = HT_HASH(ht, nIndex);
     HT_HASH(ht, nIndex) = idx;
 
     // idx 是元素在bucket数组中的位置
@@ -204,7 +204,7 @@ add_to_hash:
     target_ptr->h = h;
     uint32_t nIndex = h|ht->nTableMask;
     W_NEXT(target_ptr->val) = HT_HASH(ht, nIndex);
-    HT_HASH(ht, ht->nNumUsed);
+    HT_HASH(ht, nIndex) = idx;
     return &target_ptr->val;    
 }
 
@@ -214,10 +214,23 @@ void wung_hash_index_insert(HashTable *ht, wval *pData) {
 }
 
 Bucket * wung_hash_index_find(HashTable *ht, uint32_t h) {
-    if (h>= ht->nNumUsed) {
+    if (ht->u.flags & HASH_FLAG_PACKED) {
+        if (h>= ht->nNumUsed) {
+            return NULL;
+        }
+        return ht->arData + h;
+    } else {
+        uint32_t idx = HT_HASH(ht, h|ht->nTableMask);
+        Bucket *p;
+        while (idx!=HT_INVALID_IDX) {
+            p = HT_HASH_TO_BUCKET(ht, idx);
+            if (p->key==NULL && p->h==h) {
+                return p;
+            }
+            idx = W_NEXT(p->val);
+        }
         return NULL;
     }
-    return ht->arData + h;
 }
 
 void wung_hash_packed_to_hash(HashTable * ht) {
@@ -233,9 +246,29 @@ void wung_hash_packed_to_hash(HashTable * ht) {
 }
 
 void wung_hash_rehash(HashTable * ht) {
+    uint32_t i=0, newNumUsed=0, idx, nIndex;
+    Bucket * target_ptr = ht->arData;
+    Bucket * index_ptr = target_ptr;
     HT_HASH_RESET(ht);
-    printf("wung_hash_rehash\n");
-    exit(0);
+
+    while( (i++) < ht->nNumUsed) {
+        if (W_TYPE(index_ptr->val)!=IS_UNDEF) {
+            do {
+                if (target_ptr!=index_ptr) {
+                    WVAL_COPY_VALUE(&target_ptr->val, &index_ptr->val);
+                }
+                target_ptr->h = index_ptr->h;
+                target_ptr->key = index_ptr->key;
+                nIndex = target_ptr->h | ht->nTableMask;
+                W_NEXT(target_ptr->val) = HT_HASH(ht, nIndex);
+                HT_HASH(ht, nIndex) = newNumUsed;
+
+                target_ptr++; 
+                newNumUsed++;
+            }while(0);
+        }
+        index_ptr++;
+    }
 }
 
 void wung_hash_packed_grow(HashTable * ht) {
