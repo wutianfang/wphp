@@ -12,12 +12,18 @@
 static int WUNG_ECHO_HANDLER(wung_execute_data * execute_data ) {
     USE_OPLINE
     wval *op1 = get_val_by_node(opline->op1, execute_data);
-    switch(op1->type_info) {
+    switch(W_TYPE_P(op1)) {
         case IS_STRING:
             printf("%s", op1->value.str->val);
             break;
         case IS_LONG:
             printf("%llu", op1->value.lval);
+            break;
+        case IS_TRUE:
+            printf("true");
+            break;
+        case IS_FALSE:
+            printf("false");
             break;
     }
     return 0;
@@ -179,6 +185,67 @@ static int WUNG_ASSIGN_DIM_HANDLER(wung_execute_data * execute_data ) {
 }
 
 static int WUNG_OP_DATA_HANDLER(wung_execute_data * execute_data ) {
+
+    return 0;
+}
+
+static int WUNG_IS_EQUAL_HANDLER(wung_execute_data * execute_data) {
+    USE_OPLINE
+
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    int ret = compare_function(op1, op2);
+    if (ret==0) {
+        WVAL_BOOL(result, IS_TRUE);
+    } else {
+        WVAL_BOOL(result, IS_FALSE);
+    }
+    return 0;
+}
+
+static int WUNG_IS_NOT_EQUAL_HANDLER(wung_execute_data * execute_data) {
+    USE_OPLINE
+
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    int ret = compare_function(op1, op2);
+    if (ret==0) {
+        WVAL_BOOL(result, IS_FALSE);
+    } else {
+        WVAL_BOOL(result, IS_TRUE);
+    }
+    return 0;
+}
+
+static int WUNG_IS_SMALLER_HANDLER(wung_execute_data * execute_data) {
+    USE_OPLINE
+
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    int ret = compare_function(op1, op2);
+    if (ret<0) {
+        WVAL_BOOL(result, IS_TRUE);
+    } else {
+        WVAL_BOOL(result, IS_FALSE);
+    }
+    return 0;
+}
+
+static int WUNG_IS_SMALLER_OR_EQUAL_HANDLER(wung_execute_data * execute_data) {
+    USE_OPLINE
+
+    wval *op1 = get_val_by_node(opline->op1, execute_data);
+    wval *op2 = get_val_by_node(opline->op2, execute_data);
+    wval *result = get_val_by_node(opline->result, execute_data);
+    int ret = compare_function(op1, op2);
+    if (ret<=0) {
+        WVAL_BOOL(result, IS_TRUE);
+    } else {
+        WVAL_BOOL(result, IS_FALSE);
+    }
     return 0;
 }
 
@@ -234,6 +301,22 @@ static void wung_vm_set_opcode_handler(wung_op* op) {
 
         case WUNG_OP_DATA:
         op->handler = WUNG_OP_DATA_HANDLER;
+        break;
+
+        case WUNG_IS_EQUAL:
+        op->handler = WUNG_IS_EQUAL_HANDLER;
+        break;
+
+        case WUNG_IS_NOT_EQUAL:
+        op->handler = WUNG_IS_NOT_EQUAL_HANDLER;
+        break;
+
+        case WUNG_IS_SMALLER:
+        op->handler = WUNG_IS_SMALLER_HANDLER;
+        break;
+
+        case WUNG_IS_SMALLER_OR_EQUAL:
+        op->handler = WUNG_IS_SMALLER_OR_EQUAL_HANDLER;
         break;
     }
 }

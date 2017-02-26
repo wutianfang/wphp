@@ -82,6 +82,10 @@ const char * wung_ast_print_kind(int kind) {
             return "AST_ARRAY_ELEM";
         case WUNG_AST_DIM:
             return "AST_DIM";
+        case WUNG_AST_GREATER:
+            return "AST_GREATER";
+        case WUNG_AST_GREATER_EQUAL:
+            return "AST_GREATER_EQUAL";
         default:
             return "ERROR";
     }

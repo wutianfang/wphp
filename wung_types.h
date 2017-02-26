@@ -15,7 +15,15 @@ typedef union _wung_value{
 
 typedef struct _wval{
 	wung_value value;
-	uint32_t type_info;
+    union {
+        struct {
+            wung_uchar type;
+            wung_uchar type_flags;
+            wung_uchar const_flags;
+            wung_uchar reserved;
+        }v;
+	    uint32_t type_info;
+    }u1;
     union {
         uint32_t next;
         uint32_t lineno;
@@ -62,23 +70,27 @@ typedef struct _wung_execute_data wung_execute_data;
 #define IS_ARRAY					7
 
 #define WVAL_UNDEF(wval) do{ \
-	(*wval).type_info = IS_UNDEF; \
+    W_TYPE_INFO_P(wval) = IS_UNDEF;\
 }while(0)
 	
 #define WVAL_LONG(wval, l) do{ \
-	(*wval).type_info = IS_LONG; \
+    W_TYPE_INFO_P(wval) = IS_LONG;\
 	(*wval).value.lval = l; \
 }while(0)
 
 #define WVAL_STRING(wval, string, len) do{ \
     wung_string * __s = wung_string_init((char*)(string), (len)); \
     (wval)->value.str = __s; \
-	(wval)->type_info = IS_STRING; \
+    W_TYPE_INFO_P(wval)= IS_STRING;\
 }while(0)
 
 #define WVAL_ARR(wval, ht) do {\
     (wval)->value.arr = ht;\
-    (wval)->type_info = IS_ARRAY;\
+    W_TYPE_INFO_P(wval)= IS_ARRAY;\
+}while(0)
+
+#define WVAL_BOOL(wval, boolean) do{\
+    W_TYPE_INFO_P(wval)= (boolean==IS_TRUE) ? IS_TRUE : IS_FALSE;\
 }while(0)
 
 #define WVAL_STRING_COMPARE(str1, str2) \
@@ -89,8 +101,11 @@ typedef struct _wung_execute_data wung_execute_data;
 		memcpy(z, v, sizeof(wval)); \
 	}while(0)
 
-#define W_TYPE(zval) (zval).type_info
+#define W_TYPE(zval) (zval).u1.v.type
 #define W_TYPE_P(zval_p)  W_TYPE(*(zval_p))
+
+#define W_TYPE_INFO(wval) (wval).u1.type_info
+#define W_TYPE_INFO_P(wval) W_TYPE_INFO(*(wval))
 
 #define W_NEXT(zval) (zval).u2.next
 #define W_NEXT_P(zval_p)  W_NEXT_P(*(zval_p))

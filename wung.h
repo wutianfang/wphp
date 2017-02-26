@@ -10,6 +10,7 @@
 #include<stdio.h>
 
 typedef uint64_t wung_ulong;
+typedef unsigned char wung_uchar;
 typedef struct _wung_string{
     int len;
     char val[0];

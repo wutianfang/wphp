@@ -30,6 +30,7 @@ wval * get_val_by_node(wnode * node, wung_execute_data * execute_data);
 wung_string * convert2str(wval * op);
 int convert2long(wval * op);
 wung_string * long2str(int num);
+int compare_function(wval *op1, wval *op2);
 
 
 

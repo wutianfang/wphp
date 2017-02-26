@@ -63,6 +63,20 @@ int wung_lex(wval * val) {
     "[" {return '[';}
     "]" {return ']';}
     "," {return ',';}
+    ">" {return '>';}
+    "<" {return '<';}
+    ">=" {return T_IS_GREATER_OR_EQUAL;}
+    "<=" {return T_IS_SMALLER_OR_EQUAL;}
+    "==" {return T_IS_EQUAL;}
+    "!=" {return T_IS_NOT_EQUAL;}
+    "true" {
+        WVAL_BOOL(val, IS_TRUE);
+        return T_BOOLEAN;
+    }
+    "false" {
+        WVAL_BOOL(val, IS_FALSE);
+        return T_BOOLEAN;
+    }
     "=>" {return T_DOUBLE_ARROW;}
     "\$"[a-zA-Z_][a-zA-Z_0-9]* {
         WVAL_STRING(val, ( YYTEXT + 1), (YYCURSOR - YYTEXT -1));

@@ -26,10 +26,17 @@ void yyerror (char const *);
 %token <ast>T_LOWER_CHAR
 %token <ast>T_UPPER_CHAR
 %token <ast>T_DOUBLE_ARROW
+%token <ast>T_BOOLEAN
+%token <ast>T_IS_SMALLER_OR_EQUAL
+%token <ast>T_IS_GREATER_OR_EQUAL
+%token <ast>T_IS_EQUAL
+%token <ast>T_IS_NOT_EQUAL
 %token T_END  0
 %token T_WHITESPACE
 %left '+' '-'
 %right '*' '/'
+%nonassoc '>' T_IS_SMALLER_OR_EQUAL '<' T_IS_GREATER_OR_EQUAL
+%nonassoc T_IS_EQUAL T_IS_NOT_EQUAL
 
 %type <ast> top_statement_list top_statement statement
 %type <ast> variable
@@ -55,11 +62,18 @@ statement:
 expr :
 		T_NUMBER { $$ = $1; }
     |	T_STRING { $$ = $1; }
+    |	T_BOOLEAN { $$ = $1; }
     |	expr '+' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_ADD, $1, $3); }
     |	expr '-' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_SUB, $1, $3); }
     |	expr '*' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_MUL, $1, $3); }
     |	expr '/' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_DIV, $1, $3); }
     |	expr '.' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_CONCAT, $1, $3); }
+    |	expr '>' expr { $$ = wung_ast_create_2_child(WUNG_AST_GREATER, 0, $1, $3); }
+    |	expr '<' expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_IS_SMALLER, $1, $3); }
+    |	expr T_IS_GREATER_OR_EQUAL expr { $$ = wung_ast_create_2_child(WUNG_AST_GREATER_EQUAL, 0, $1, $3); }
+    |	expr T_IS_SMALLER_OR_EQUAL expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_IS_SMALLER_OR_EQUAL, $1, $3); }
+    |	expr T_IS_EQUAL expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_IS_EQUAL, $1, $3); }
+    |	expr T_IS_NOT_EQUAL expr { $$ = wung_ast_create_2_child(WUNG_AST_BINARY_OP, WUNG_IS_NOT_EQUAL, $1, $3); }
     |   variable {$$ = $1;}
     |	'(' expr ')'  { $$ = $2;}
     |   array_scalar { $$ = $1;}

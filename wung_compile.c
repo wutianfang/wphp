@@ -203,6 +203,19 @@ void wung_compile_expr(wnode * result, wung_ast * ast) {
            result->u.constant = wung_add_literal(CG(active_op_array), &(ast->val));
            result->op_type = IS_CONST;
         break;
+
+        case WUNG_AST_GREATER:
+        case WUNG_AST_GREATER_EQUAL:{
+            wung_ast * tmp_ast = ast->child[0]; 
+            ast->child[0] = ast->child[1];
+            ast->child[1] = tmp_ast;
+            if (ast->kind==WUNG_AST_GREATER) {
+               ast->attr = WUNG_IS_SMALLER;
+            } else {
+                ast->attr = WUNG_IS_SMALLER_OR_EQUAL;
+            }
+            ast->kind = WUNG_AST_BINARY_OP;
+        }
         
         case WUNG_AST_BINARY_OP:
             wung_compile_binary_op(result, ast);
@@ -268,6 +281,10 @@ const char * opcode2str(int opcode) {
         case WUNG_FETCH_DIM_W:return "WUNG_FETCH_DIM_W";
         case WUNG_ASSIGN_DIM:return "WUNG_ASSIGN_DIM";
         case WUNG_OP_DATA:return "WUNG_OP_DATA";
+        case WUNG_IS_EQUAL:return "WUNG_IS_EQUAL";
+        case WUNG_IS_NOT_EQUAL:return "WUNG_IS_NOT_EQUAL";
+        case WUNG_IS_SMALLER:return "WUNG_IS_SMALLER";
+        case WUNG_IS_SMALLER_OR_EQUAL:return "WUNG_IS_SMALLER_OR_EQUAL";
     }
     return "ERROR";
 }

@@ -53,7 +53,7 @@ wval * get_val_by_node(wnode * node, wung_execute_data * execute_data) {
 }
 
 wung_string * convert2str(wval *op) {
-    switch (op->type_info) {
+    switch (W_TYPE_P(op)) {
         case IS_LONG:
             return long2str(op->value.lval);
         case IS_STRING:
@@ -63,11 +63,15 @@ wung_string * convert2str(wval *op) {
 }
 
 int convert2long(wval * op) {
-    switch (op->type_info) {
+    switch (W_TYPE_P(op)) {
         case IS_LONG:
             return op->value.lval;
         case IS_STRING:
             return atoi(op->value.str->val);
+        case IS_TRUE:
+            return 1;
+        case IS_FALSE:
+            return -1;
     }
     return 0;
 }
@@ -91,4 +95,17 @@ wung_string * long2str(int num) {
     return wung_string_init(ptr, buf + sizeof(buf)-1 - ptr);
 }
 
+int compare_function(wval *op1, wval *op2) {
+    int long1 = convert2long(op1);
+    int long2 = convert2long(op2);
+    if (long1==long2){
+        return 0;
+    } else if (long1 > long2) {
+        return 1;
+    } else {
+        return -1;
+    }
+
+    return 0;
+}
 
